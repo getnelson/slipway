@@ -34,6 +34,8 @@ func main() {
   // switches for the cli
   var userGithubToken string
   var userDirectory string
+  var userGithubHost string
+  var userGithubTag string
 
   app.Commands = []cli.Command {
     ////////////////////////////// DEPLOYABLE //////////////////////////////////
@@ -54,15 +56,28 @@ func main() {
       },
     },
     {
-      Name:    "gen",
+      Name:    "release",
       Usage:   "generate deployable metdata for units",
       Flags: []cli.Flag {
-        cli.StringFlag{
-          Name:   "token, t",
+        cli.StringFlag {
+          Name:   "auth, a",
           Value:  "",
           Usage:  "your github personal access token",
           EnvVar: "GITHUB_TOKEN",
           Destination: &userGithubToken,
+        },
+        cli.StringFlag {
+          Name:   "endpoint, x",
+          Value:  "",
+          Usage:  "host of the github api endpoint",
+          EnvVar: "GITHUB_ADDR",
+          Destination: &userGithubHost,
+        },
+        cli.StringFlag {
+          Name:   "tag, t",
+          Value:  "",
+          Usage:  "host of the github api endpoint",
+          Destination: &userGithubTag,
         },
       },
       Action:  func(c *cli.Context) error {
