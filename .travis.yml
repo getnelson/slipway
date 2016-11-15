@@ -1,0 +1,30 @@
+language: go
+
+install:
+  - go get github.com/constabulary/gb/...
+
+before_script:
+  - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then git checkout -qf $TRAVIS_BRANCH; fi"
+
+script:
+  - export TAR_NAME=overhaul-$TARGET_PLATFORM-amd64-$CLI_VERSION.tar.gz
+  - gb test -v
+  - GOOS=$TARGET_PLATFORM GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=$TRAVIS_BUILD_NUMBER"
+  - mv bin/overhaul-$TARGET_PLATFORM-amd64 ./overhaul
+  - tar -zcvf $TAR_NAME overhaul
+  - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then curl -u $NEXUS_CREDENTIALS --upload-file $TAR_NAME $NEXUS_URL/$TAR_NAME; fi"
+  - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then echo 'Download from ' $NEXUS_URL/$TAR_NAME; fi"
+
+matrix:
+  include:
+    - go: 1.6
+      env: TARGET_PLATFORM=linux
+    - go: 1.6
+      env: TARGET_PLATFORM=darwin
+
+env:
+  global:
+    - CLI_VERSION="0.1.$TRAVIS_BUILD_NUMBER"
+    - NEXUS_URL="http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/overhaul/$CLI_VERSION/"
+    # - secure: "A0l4p95hkHbFs1yWTaBAYp559bQen4Y8hdHYc/qAyu4b5DJJGEesYPSQctTCFFIKi94X8MCv2WNMf3qTwTZayP96mXh9SXS9tsTAIc2w8GqXgTxipMjq1BQxL4p0/Vy613CRqH1DvPZv8HmuEEl2MYEVRlhTnH9KM34qNQ4OwE0="
+
