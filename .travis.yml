@@ -26,5 +26,4 @@ env:
   global:
     - CLI_VERSION="0.1.$TRAVIS_BUILD_NUMBER"
     - NEXUS_URL="http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/slipway/$CLI_VERSION/"
-    # - secure: "A0l4p95hkHbFs1yWTaBAYp559bQen4Y8hdHYc/qAyu4b5DJJGEesYPSQctTCFFIKi94X8MCv2WNMf3qTwTZayP96mXh9SXS9tsTAIc2w8GqXgTxipMjq1BQxL4p0/Vy613CRqH1DvPZv8HmuEEl2MYEVRlhTnH9KM34qNQ4OwE0="
-
+    - secure: "ABW2YjCq0xhkWbnrazL1IhKaIN7zr90BQWmeC3uII/4mQJ5sxY0sssFSMWM1hMDDzWKjpXTeVJlhjqyPQ9LHceLjA74UrPBKX8saKg0f4ZcfbjFyXSCEme6nDl4ktYuuqDFlTNdokpOtb6mHQiPLHahNkIVjL48s32WoaCEZsKg="
