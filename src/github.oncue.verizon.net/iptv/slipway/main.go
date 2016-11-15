@@ -8,6 +8,7 @@ import (
   // "strings"
   "strconv"
   "gopkg.in/urfave/cli.v1"
+  // "github.com/google/go-github/github"
 )
 
 var globalBuildVersion string
@@ -28,6 +29,8 @@ func main() {
   app.Copyright = "© "+strconv.Itoa(year)+" Verizon Labs"
   app.Usage = "generate metadata and releases compatible with Nelson"
   app.EnableBashCompletion = true
+
+  // github := github.NewClient(nil)
 
   // pi   := ProgressIndicator()
 
@@ -79,9 +82,20 @@ func main() {
           Usage:  "host of the github api endpoint",
           Destination: &userGithubTag,
         },
+        cli.StringFlag {
+          Name:   "dir, d",
+          Value:  "",
+          Usage:  "directory of .deployable.yml files to upload",
+          Destination: &userGithubTag,
+        },
       },
       Action:  func(c *cli.Context) error {
-        fmt.Println("testing")
+        credentials, err := loadGithubCredentials();
+        if err == nil {
+          fmt.Println(credentials);
+        } else {
+          return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
+        }
         return nil
       },
     },

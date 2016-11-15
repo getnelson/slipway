@@ -9,10 +9,10 @@ Slipway provides a small, native binary that creates Github releases and the ass
 Generate metadata for a given container:
 
 ```
-slipway deployable your.docker.com/foo/bar:1.2.3
+slipway gen your.docker.com/foo/bar:1.2.3
 
 # optionally specify an output directory
-slipway deployable -d /path/to/dir your.docker.com/foo/bar:1.2.3
+slipway gen -d /path/to/dir your.docker.com/foo/bar:1.2.3
 ```
 
 Cut a release with a set of deployables:
