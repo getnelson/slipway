@@ -8,7 +8,6 @@ import (
   // "strings"
   "strconv"
   "gopkg.in/urfave/cli.v1"
-  // "github.com/google/go-github/github"
 )
 
 var globalBuildVersion string
@@ -54,7 +53,7 @@ func main() {
         },
       },
       Action:  func(c *cli.Context) error {
-        fmt.Println("testing")
+        fmt.Println(GenerateRandomName())
         return nil
       },
     },
