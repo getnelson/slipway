@@ -24,7 +24,7 @@ func buildGithubClient(domain string, credentials Credentials) (gh *github.Clien
     u, _ := url.Parse("https://"+domain+"/api/v3/")
     client.BaseURL = u
 
-    uu, _ := url.Parse("https://"+domain+"/api/uploads")
+    uu, _ := url.Parse("https://"+domain+"/api/uploads/")
     client.UploadURL = uu
 
     return client

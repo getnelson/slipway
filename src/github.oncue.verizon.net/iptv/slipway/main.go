@@ -117,10 +117,6 @@ func main() {
           }
         }
 
-        fmt.Println(deployablePaths)
-
-        // return nil
-
         credentials, err := loadGithubCredentials();
         if err == nil {
           gh := buildGithubClient(userGithubHost, credentials)
@@ -140,6 +136,8 @@ func main() {
           // create the release
           release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
 
+          fmt.Println("Created release "+strconv.Itoa(*release.ID)+" on "+owner+"/"+reponame)
+
           if e != nil {
             fmt.Println(e)
             return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint.", 1)
@@ -151,14 +149,22 @@ func main() {
             name    := slices[len(slices)-1]
             file, _ := os.Open(path)
 
+            fmt.Println("Uploading "+name+" as a release asset...")
+
             opt := &github.UploadOptions{ Name: name }
             gh.Repositories.UploadReleaseAsset(owner, reponame, *release.ID, opt, file)
           }
 
-          fmt.Println(release)
+          fmt.Println("Promoting release from a draft to offical release...")
+
+          // mutability ftw?
+          isDraft = false
+          gh.Repositories.EditRelease(owner, reponame, *release.ID, &r)
+
         } else {
           return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
         }
+
         return nil
       },
     },
