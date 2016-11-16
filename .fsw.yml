@@ -5,7 +5,7 @@ triggers:
   - '**/*.go'
   env:
     DEBUG: "1"
-  cmd: gb build; gb test
+  cmd: gb build
   shell: true
   delay: 100ms
   signal: KILL

@@ -3,6 +3,10 @@ language: go
 install:
   - go get github.com/constabulary/gb/...
 
+branches:
+  only:
+    - master
+
 before_script:
   - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then git checkout -qf $TRAVIS_BRANCH; fi"
 
@@ -12,6 +16,7 @@ script:
   - GOOS=$TARGET_PLATFORM GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=$TRAVIS_BUILD_NUMBER"
   - mv bin/slipway-$TARGET_PLATFORM-amd64 ./slipway
   - tar -zcvf $TAR_NAME slipway
+  - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then git tag $CLI_VERSION && git push --tags origin; fi"
   - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then curl -u $NEXUS_CREDENTIALS --upload-file $TAR_NAME $NEXUS_URL/$TAR_NAME; fi"
   - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then echo 'Download from ' $NEXUS_URL/$TAR_NAME; fi"
 
