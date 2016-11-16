@@ -56,7 +56,13 @@ func main() {
         }
 
         if len(userDirectory) <= 0 {
-          return cli.NewExitError("You must specify a '--dir' or '-d' flag with the destination directory for the deployable yml file.", 1)
+          pwd, _ := os.Getwd()
+          if len(pwd) <= 0 {
+            return cli.NewExitError("You must specify a '--dir' or '-d' flag with the destination directory for the deployable yml file.", 1)
+          } else {
+            userDirectory = pwd
+            fmt.Println("No destination folder specified. Assuming the current working directory.")
+          }
         } else {
           if stat, err := os.Stat(userDirectory); err != nil && stat.IsDir() {
             return cli.NewExitError("The specified directory "+userDirectory+" does not exist.", 1)

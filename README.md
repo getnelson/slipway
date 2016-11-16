@@ -9,6 +9,7 @@ Slipway provides a small, native binary that creates Github releases and the ass
 Generate metadata for a given container:
 
 ```
+# will assume you want the .deployable.yml generated in the current working directory
 slipway gen your.docker.com/foo/bar:1.2.3
 
 # optionally specify an output directory
