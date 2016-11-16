@@ -15,14 +15,24 @@ slipway gen your.docker.com/foo/bar:1.2.3
 slipway gen -d /path/to/dir your.docker.com/foo/bar:1.2.3
 ```
 
-Cut a release with a set of deployables:
+Cut a release with an optional set of deployables (note, for use with Nelson, you *need* the `.deployable.yml` files):
 
 ```
-# specify the github domain
-slipway release -x github.oncue.verizon.net --auth $GITHUB_TOKEN
+# release a tag for a repository hosted on github.com
+# this release has zero release assets
+slipway release -t 2.0.0
 
-# optionally specify an input directory
-slipway release -d /path/to/dir
+# release a tag for a repository hosted on github.com
+# read the release assets from `pwd`/target
+slipway release -t 2.0.0 -d `pwd`/target
+
+# specify the github domain, tag, and input directory.
+# the repo slug will automatically be read from TRAVIS_REPO_SLUG
+slipway release -x github.oncue.verizon.net -t 2.0.0 -d `pwd`/target
+
+# specify the github domain, tag, repo slug and input directory
+slipway release -x github.oncue.verizon.net -t 2.0.0 -r tim/sbt-release-sandbox -d `pwd`/target
+
 ```
 
 ## Development

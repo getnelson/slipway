@@ -49,7 +49,9 @@ func main() {
         },
       },
       Action:  func(c *cli.Context) error {
-        fmt.Println(GenerateRandomName())
+        if len(userDirectory) <= 0 {
+          return cli.NewExitError("You must specify a '--dir' or '-d' flag with the destination directory for the deployable yml file.", 1)
+        }
         return nil
       },
     },
