@@ -27,3 +27,4 @@ bin/*
 pkg/*
 
 target
+*.deployable.yml

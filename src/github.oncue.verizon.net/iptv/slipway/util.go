@@ -42,7 +42,6 @@ func findDeployableFilesInDir(path string) ([]string, error) {
     desired := []string{}
 
     for _, file := range files {
-      // fmt.Println(file.Name())
       if strings.HasSuffix(file.Name(), ".deployable.yml") && file.IsDir() == false {
         desired = append(desired, path+"/"+file.Name())
       }
@@ -53,4 +52,22 @@ func findDeployableFilesInDir(path string) ([]string, error) {
   } else {
     return nil, e
   }
+}
+
+/*
+ * this function is pretty basic, and really only splits
+ * the following case:
+ * your.docker.com/foo/bar:1.2.3
+ *
+ * The author fully reconizes that this is fucking janky
+ * and does not cover all the possible use cases for a docker
+ * container name.
+ */
+func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
+  arr   := strings.Split(ctr, ":")
+  image := arr[0]
+  tag   := arr[len(arr)-1]
+  name  := strings.Split(image, "/")
+  last  := name[len(name)-1]
+  return last, tag
 }

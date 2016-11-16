@@ -6,6 +6,7 @@ import (
   "time"
   "strings"
   "strconv"
+  "io/ioutil"
   "gopkg.in/urfave/cli.v1"
   "github.com/google/go-github/github"
 )
@@ -49,9 +50,39 @@ func main() {
         },
       },
       Action:  func(c *cli.Context) error {
+        ctr := strings.TrimSpace(c.Args().First())
+        if len(ctr) <= 0 {
+          return cli.NewExitError("You must specify the name of a docker container in order to generate Nelson deployable yml.", 1)
+        }
+
         if len(userDirectory) <= 0 {
           return cli.NewExitError("You must specify a '--dir' or '-d' flag with the destination directory for the deployable yml file.", 1)
+        } else {
+          if stat, err := os.Stat(userDirectory); err != nil && stat.IsDir() {
+            return cli.NewExitError("The specified directory "+userDirectory+" does not exist.", 1)
+          }
         }
+
+        var canonicalDir string
+        if strings.HasSuffix(userDirectory, "/"){
+          canonicalDir = userDirectory
+        } else {
+          canonicalDir = userDirectory + "/"
+        }
+
+        name, tag := getUnitNameFromDockerContainer(ctr)
+
+        yaml := "name: "+name+"\n" +
+                "version: "+tag+"\n" +
+                "output:\n" +
+                "  kind: container\n" +
+                "  image: "+ctr
+
+        outputPath := canonicalDir + name + ".deployable.yml"
+
+        fmt.Println("Writing to "+outputPath+"...")
+        ioutil.WriteFile(outputPath, []byte(yaml), 0644)
+
         return nil
       },
     },
