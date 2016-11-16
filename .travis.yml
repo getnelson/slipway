@@ -30,5 +30,5 @@ matrix:
 env:
   global:
     - CLI_VERSION="0.1.$TRAVIS_BUILD_NUMBER"
-    - NEXUS_URL="http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/slipway/$CLI_VERSION/"
+    - NEXUS_URL="http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/slipway/$CLI_VERSION"
     - secure: "ABW2YjCq0xhkWbnrazL1IhKaIN7zr90BQWmeC3uII/4mQJ5sxY0sssFSMWM1hMDDzWKjpXTeVJlhjqyPQ9LHceLjA74UrPBKX8saKg0f4ZcfbjFyXSCEme6nDl4ktYuuqDFlTNdokpOtb6mHQiPLHahNkIVjL48s32WoaCEZsKg="
