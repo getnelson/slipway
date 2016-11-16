@@ -29,8 +29,6 @@ func main() {
   app.Usage = "generate metadata and releases compatible with Nelson"
   app.EnableBashCompletion = true
 
-  // pi   := ProgressIndicator()
-
   // switches for the cli
   var userDirectory string
   var userGithubHost string

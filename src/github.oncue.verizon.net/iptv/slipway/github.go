@@ -6,10 +6,6 @@ import (
   "github.com/google/go-github/github"
 )
 
-// func createGithubRelease(owner, repo string, r *RepositoriesService) {
-  // CreateRelease(owner, repo string, release *RepositoryRelease) (*RepositoryRelease, *Response, error)
-// }
-
 func buildGithubClient(domain string, credentials Credentials) (gh *github.Client) {
   if domain == "" {
     return github.NewClient(nil)

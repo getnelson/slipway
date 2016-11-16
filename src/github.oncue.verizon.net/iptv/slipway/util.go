@@ -2,10 +2,8 @@ package main
 
 import (
   "os"
-  // "fmt"
   "time"
   "strings"
-  // "errors"
   "io/ioutil"
   "gopkg.in/magiconair/properties.v1"
 )
