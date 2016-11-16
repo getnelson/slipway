@@ -22,9 +22,9 @@ script:
 
 matrix:
   include:
-    - go: 1.6
+    - go: 1.7
       env: TARGET_PLATFORM=linux
-    - go: 1.6
+    - go: 1.7
       env: TARGET_PLATFORM=darwin
 
 env:
