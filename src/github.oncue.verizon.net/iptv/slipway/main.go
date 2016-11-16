@@ -208,6 +208,7 @@ func main() {
           }
 
         } else {
+          fmt.Println(err)
           return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
         }
 
