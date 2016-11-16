@@ -107,14 +107,19 @@ func main() {
         deployablePaths, direrr := findDeployableFilesInDir(userDirectory)
 
         if len(userDirectory) != 0 {
+          // if you specified a dir, but it was not readable or it didnt exist
           if direrr != nil {
             return cli.NewExitError("Unable to read from "+userDirectory+"; check the location exists and is readable.", 1)
+          }
+          // if you specify a dir, and it was readable, but there were no deployable files
+          if len(deployablePaths) <= 0 {
+            return cli.NewExitError("Readable directory "+userDirectory+" contained no '.deployable.yml' files.", 1)
           }
         }
 
         fmt.Println(deployablePaths)
 
-        return nil
+        // return nil
 
         credentials, err := loadGithubCredentials();
         if err == nil {
