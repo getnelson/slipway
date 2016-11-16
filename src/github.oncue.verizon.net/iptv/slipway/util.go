@@ -3,6 +3,7 @@ package main
 import (
   // "errors"
   "os"
+  "time"
   "gopkg.in/magiconair/properties.v1"
 )
 
@@ -24,4 +25,8 @@ func loadGithubCredentials() (cred Credentials, err []error) {
   } else {
     return Credentials { "unknown", "unknown" }, []error{ err }
   }
+}
+
+func makeTimestamp() int64 {
+  return time.Now().UnixNano() / int64(time.Millisecond)
 }

@@ -5,9 +5,12 @@ import (
   "fmt"
   "time"
   // "regexp"
-  // "strings"
+  "strings"
+  // "net/url"
   "strconv"
   "gopkg.in/urfave/cli.v1"
+  // "golang.org/x/oauth2"
+  "github.com/google/go-github/github"
 )
 
 var globalBuildVersion string
@@ -29,15 +32,13 @@ func main() {
   app.Usage = "generate metadata and releases compatible with Nelson"
   app.EnableBashCompletion = true
 
-  // github := github.NewClient(nil)
-
   // pi   := ProgressIndicator()
 
   // switches for the cli
-  var userGithubToken string
   var userDirectory string
   var userGithubHost string
   var userGithubTag string
+  var userGithubRepoSlug string
 
   app.Commands = []cli.Command {
     ////////////////////////////// DEPLOYABLE //////////////////////////////////
@@ -62,18 +63,18 @@ func main() {
       Usage:   "generate deployable metdata for units",
       Flags: []cli.Flag {
         cli.StringFlag {
-          Name:   "auth, a",
-          Value:  "",
-          Usage:  "your github personal access token",
-          EnvVar: "GITHUB_TOKEN",
-          Destination: &userGithubToken,
-        },
-        cli.StringFlag {
           Name:   "endpoint, x",
           Value:  "",
-          Usage:  "host of the github api endpoint",
+          Usage:  "domain of the github api endpoint",
           EnvVar: "GITHUB_ADDR",
           Destination: &userGithubHost,
+        },
+        cli.StringFlag {
+          Name:   "repo, r",
+          Value:  "",
+          Usage:  "the repository in question, e.g. verizon/knobs",
+          EnvVar: "TRAVIS_REPO_SLUG",
+          Destination: &userGithubRepoSlug,
         },
         cli.StringFlag {
           Name:   "tag, t",
@@ -85,13 +86,49 @@ func main() {
           Name:   "dir, d",
           Value:  "",
           Usage:  "directory of .deployable.yml files to upload",
-          Destination: &userGithubTag,
+          Destination: &userDirectory,
         },
       },
       Action:  func(c *cli.Context) error {
+        if len(userGithubTag) <= 0  {
+          return cli.NewExitError("You must specifiy a `--tag` or a `-t` to create releases.", 1)
+        }
+        if len(userGithubRepoSlug) <= 0  {
+          return cli.NewExitError("You must specifiy a `--repo` or a `-r` to create releases.", 1)
+        }
+
+        splitarr := strings.Split(userGithubRepoSlug, "/")
+        if len(splitarr) != 2 {
+          return cli.NewExitError("The specified repository name was not of the format 'foo/bar'", 1)
+        }
+
+        owner := splitarr[0]
+        reponame := splitarr[1]
+
         credentials, err := loadGithubCredentials();
         if err == nil {
-          fmt.Println(credentials);
+          gh := buildGithubClient(userGithubHost, credentials)
+
+          name := GenerateRandomName()
+          commitish := "master"
+          isDraft := true
+          // owner :=
+
+          // release structure
+          r := github.RepositoryRelease {
+            TagName: &userGithubTag,
+            TargetCommitish: &commitish,
+            Name: &name,
+            Draft: &isDraft,
+          }
+
+          // create the release
+          release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
+
+          fmt.Println(release)
+          fmt.Println(">>>>>>>>>>>>>>>>>>")
+          fmt.Println(e)
+
         } else {
           return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
         }

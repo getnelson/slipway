@@ -16,25 +16,6 @@
 			"path": "/query"
 		},
 		{
-			"importpath": "github.com/klauspost/compress/flate",
-			"repository": "https://github.com/klauspost/compress",
-			"revision": "e3b7981a12dd3cab49afa1d3a50e715846f23732",
-			"branch": "master",
-			"path": "/flate"
-		},
-		{
-			"importpath": "github.com/klauspost/cpuid",
-			"repository": "https://github.com/klauspost/cpuid",
-			"revision": "09cded8978dc9e80714c4d85b0322337b0a1e5e0",
-			"branch": "master"
-		},
-		{
-			"importpath": "github.com/mattn/go-isatty",
-			"repository": "https://github.com/mattn/go-isatty",
-			"revision": "66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/urfave/cli",
 			"repository": "https://github.com/urfave/cli",
 			"revision": "b4f4786f378c0c1d3336b5bb798094b166edf5a9",
