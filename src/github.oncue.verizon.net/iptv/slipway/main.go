@@ -159,7 +159,16 @@ func main() {
 
           // mutability ftw?
           isDraft = false
-          gh.Repositories.EditRelease(owner, reponame, *release.ID, &r)
+          r2 := github.RepositoryRelease {
+            Draft: &isDraft,
+          }
+
+          _, _, xxx := gh.Repositories.EditRelease(owner, reponame, *release.ID, &r2)
+
+          if xxx != nil {
+            fmt.Println(xxx)
+            return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
+          }
 
         } else {
           return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
