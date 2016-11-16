@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis.oncue.verizon.net/iptv/slipway.svg?token=Lp2ZVD96vfT8T599xRfV)](https://travis.oncue.verizon.net/iptv/slipway)
 
-Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.oncue.verizon.net/pages/iptv/nelson) deployment system.
+Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.oncue.verizon.net/pages/iptv/nelson) deployment system. 
+
+## Instalation
+
+Download the latest release of slipway [from the internal nexus](http://nexus.oncue.verizon.net/nexus/content/groups/internal/verizon/inf/slipway/), and place the binary on your `$PATH`
 
 ## Usage
 
