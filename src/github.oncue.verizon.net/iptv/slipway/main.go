@@ -4,12 +4,9 @@ import (
   "os"
   "fmt"
   "time"
-  // "regexp"
   "strings"
-  // "net/url"
   "strconv"
   "gopkg.in/urfave/cli.v1"
-  // "golang.org/x/oauth2"
   "github.com/google/go-github/github"
 )
 
@@ -90,6 +87,8 @@ func main() {
         },
       },
       Action:  func(c *cli.Context) error {
+        // deployables =
+
         if len(userGithubTag) <= 0  {
           return cli.NewExitError("You must specifiy a `--tag` or a `-t` to create releases.", 1)
         }
@@ -105,6 +104,18 @@ func main() {
         owner := splitarr[0]
         reponame := splitarr[1]
 
+        deployablePaths, direrr := findDeployableFilesInDir(userDirectory)
+
+        if len(userDirectory) != 0 {
+          if direrr != nil {
+            return cli.NewExitError("Unable to read from "+userDirectory+"; check the location exists and is readable.", 1)
+          }
+        }
+
+        fmt.Println(deployablePaths)
+
+        return nil
+
         credentials, err := loadGithubCredentials();
         if err == nil {
           gh := buildGithubClient(userGithubHost, credentials)
@@ -112,7 +123,6 @@ func main() {
           name := GenerateRandomName()
           commitish := "master"
           isDraft := true
-          // owner :=
 
           // release structure
           r := github.RepositoryRelease {

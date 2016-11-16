@@ -1,9 +1,12 @@
 package main
 
 import (
-  // "errors"
   "os"
+  // "fmt"
   "time"
+  "strings"
+  // "errors"
+  "io/ioutil"
   "gopkg.in/magiconair/properties.v1"
 )
 
@@ -29,4 +32,27 @@ func loadGithubCredentials() (cred Credentials, err []error) {
 
 func makeTimestamp() int64 {
   return time.Now().UnixNano() / int64(time.Millisecond)
+}
+
+func findDeployableFilesInDir(path string) ([]string, error) {
+  if _, e := os.Stat(path); e == nil {
+    files, err := ioutil.ReadDir(path)
+    if err != nil {
+      return nil, err
+    }
+
+    desired := []string{}
+
+    for _, file := range files {
+      // fmt.Println(file.Name())
+      if strings.HasSuffix(file.Name(), ".deployable.yml") && file.IsDir() == false {
+        desired = append(desired, path+"/"+file.Name())
+      }
+    }
+
+    return desired, nil
+
+  } else {
+    return nil, e
+  }
 }
