@@ -66,8 +66,6 @@ func main() {
         } else {
           if _, err := os.Stat(userDirectory); err != nil {
             return cli.NewExitError("The specified directory "+userDirectory+" does not exist or cannot be accessed.", 1)
-          } else {
-            return cli.NewExitError("The specified directory "+userDirectory+" made no sense what-so-ever.", 1)
           }
         }
 
