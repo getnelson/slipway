@@ -64,8 +64,10 @@ func main() {
             fmt.Println("No destination folder specified. Assuming the current working directory.")
           }
         } else {
-          if stat, err := os.Stat(userDirectory); err != nil && stat.IsDir() {
-            return cli.NewExitError("The specified directory "+userDirectory+" does not exist.", 1)
+          if _, err := os.Stat(userDirectory); err != nil {
+            return cli.NewExitError("The specified directory "+userDirectory+" does not exist or cannot be accessed.", 1)
+          } else {
+            return cli.NewExitError("The specified directory "+userDirectory+" made no sense what-so-ever.", 1)
           }
         }
 
