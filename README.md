@@ -57,7 +57,7 @@ script:
   # for each container you want to output from this repository
   - docker images | grep docker.oncue.verizon.net | awk '{print $1 ":" $2}' | docker gen
   - |
-    if [ $TRAVIS_PULL_REQUEST = 'false' ]; 
+    if [ $TRAVIS_PULL_REQUEST = 'false' ]; then
       git tag $RELEASE_VERSION && 
       git push --tags origin &&
       slipway release -x github.oncue.verizon.net -t $RELEASE_VERSION -d `pwd`
