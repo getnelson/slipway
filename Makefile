@@ -7,7 +7,7 @@ BINARY_NAME=slipway
 BINARY_FEATURE_VERSION=0.2
 BINARY_VERSION=${BINARY_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
 IMAGE_TAG=docker.oncue.verizon.net/units/consort-${BINARY_FEATURE_VERSION}:${BINARY_VERSION}
-TGZ_NAME=${BINARY_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${BINARY_VERSION}.tgz
+TGZ_NAME=${BINARY_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${BINARY_VERSION}.tar.gz
 # if not set, then we're doing local development
 # as this will be set by the travis matrix for realz
 TARGET_PLATFORM ?= darwin
