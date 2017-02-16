@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis.oncue.verizon.net/iptv/slipway.svg?token=Lp2ZVD96vfT8T599xRfV)](https://travis.oncue.verizon.net/iptv/slipway)
 
-Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.oncue.verizon.net/pages/iptv/nelson) deployment system. 
+Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.oncue.verizon.net/pages/iptv/nelson) deployment system.
 
 ## Instalation
 
@@ -52,13 +52,13 @@ install:
 
 script:
   - // do your build stuff
-  # This assumes you are output docker images for internal consumption, 
-  # but essentially do whatever you need to in order to generate deployables 
+  # This assumes you are output docker images for internal consumption,
+  # but essentially do whatever you need to in order to generate deployables
   # for each container you want to output from this repository
   - docker images | grep docker.oncue.verizon.net | awk '{print $1 ":" $2}' | docker gen
   - |
-    if [ $TRAVIS_PULL_REQUEST = 'false' ]; 
-      git tag $RELEASE_VERSION && 
+    if [ $TRAVIS_PULL_REQUEST = 'false' ];
+      git tag $RELEASE_VERSION &&
       git push --tags origin &&
       slipway release -x github.oncue.verizon.net -t $RELEASE_VERSION -d `pwd`
     fi
@@ -69,15 +69,14 @@ env:
 
 ```
 
-That's all there is to it. 
+That's all there is to it.
 
 ## Development
 
 1. `brew install go` - install the Go programming language:
-1. `go get github.com/constabulary/gb/...` - install the `gb` build tool
-1. `go get github.com/codeskyblue/fswatch` - install `fswatch` so we can do continous compilation
+1. `make devel`
 1. `alias fswatch="$GOPATH/bin/fswatch"
-1. `fswatch`
+1. `make watch`
 
 This should give continous compilation without the tedious need to constantly restart `gb build`
 
