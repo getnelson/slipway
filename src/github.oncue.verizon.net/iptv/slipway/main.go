@@ -13,7 +13,7 @@ import (
 
 var globalBuildVersion string
 
-func CurrentVersion() string {
+func currentVersion() string {
 	if len(globalBuildVersion) == 0 {
 		return "devel"
 	} else {
@@ -25,7 +25,7 @@ func main() {
 	year, _, _ := time.Now().Date()
 	app := cli.NewApp()
 	app.Name = "slipway"
-	app.Version = CurrentVersion()
+	app.Version = currentVersion()
 	app.Copyright = "© " + strconv.Itoa(year) + " Verizon Labs"
 	app.Usage = "generate metadata and releases compatible with Nelson"
 	app.EnableBashCompletion = true
