@@ -1,28 +1,28 @@
 package main
 
 import (
-  "net/url"
-  "strings"
-  "github.com/google/go-github/github"
+	"github.com/google/go-github/github"
+	"net/url"
+	"strings"
 )
 
 func buildGithubClient(domain string, credentials Credentials) (gh *github.Client) {
-  if domain == "" {
-    return github.NewClient(nil)
-  } else {
-    tp := github.BasicAuthTransport {
-      Username: strings.TrimSpace(credentials.Username),
-      Password: strings.TrimSpace(credentials.Token),
-    }
+	if domain == "" {
+		return github.NewClient(nil)
+	} else {
+		tp := github.BasicAuthTransport{
+			Username: strings.TrimSpace(credentials.Username),
+			Password: strings.TrimSpace(credentials.Token),
+		}
 
-    client := github.NewClient(tp.Client())
+		client := github.NewClient(tp.Client())
 
-    u, _ := url.Parse("https://"+domain+"/api/v3/")
-    client.BaseURL = u
+		u, _ := url.Parse("https://" + domain + "/api/v3/")
+		client.BaseURL = u
 
-    uu, _ := url.Parse("https://"+domain+"/api/uploads/")
-    client.UploadURL = uu
+		uu, _ := url.Parse("https://" + domain + "/api/uploads/")
+		client.UploadURL = uu
 
-    return client
-  }
+		return client
+	}
 }
