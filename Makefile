@@ -1,6 +1,7 @@
 
 TRAVIS_BUILD_NUMBER ?= 9999
 NEXUS_CREDENTIALS ?= "anon:precioussecrets"
+NEXUS_BASE_URL=http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf
 
 BINARY_NAME=slipway
 BINARY_FEATURE_VERSION=0.2
@@ -13,6 +14,10 @@ TARGET_PLATFORM ?= darwin
 TARGET_ARCH ?= amd64
 
 all: package
+
+devel:
+	go get github.com/constabulary/gb/... && \
+	go get github.com/codeskyblue/fswatch
 
 watch:
 	fswatch
@@ -42,5 +47,8 @@ clean:
 	rm -rf target
 
 publish:
-	tar -c -z -f ${TGZ_NAME} -C bin consort && \
-	curl -v -u ${NEXUS_CREDENTIALS} --upload-file ${TGZ_NAME} http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/${BINARY_NAME}/${BINARY_VERSION}/${TGZ_NAME}
+	curl -v -u ${NEXUS_CREDENTIALS} --upload-file target/${TGZ_NAME} ${NEXUS_BASE_URL}/${BINARY_NAME}/${BINARY_VERSION}/${TGZ_NAME}
+
+release:
+	git tag ${BINARY_VERSION} && \
+	git push --tags origin
