@@ -4,6 +4,7 @@ import (
 	"gopkg.in/magiconair/properties.v1"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -64,10 +65,15 @@ func findDeployableFilesInDir(path string) ([]string, error) {
  * container name.
  */
 func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
+	re, _ := regexp.Compile("^.*(-[0-9.]+)$")
+
 	arr := strings.Split(ctr, ":")
 	image := arr[0]
 	tag := arr[len(arr)-1]
 	name := strings.Split(image, "/")
 	last := name[len(name)-1]
-	return last, tag
+	fev := re.FindStringSubmatch(last)[1]
+	sanitzed := strings.Replace(last, fev, "", 1)
+
+	return sanitzed, tag
 }

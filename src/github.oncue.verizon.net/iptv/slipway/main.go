@@ -78,10 +78,11 @@ func main() {
 
 				name, tag := getUnitNameFromDockerContainer(ctr)
 
-				yaml := "name: " + name + "\n" +
+				yaml := "---\n" +
+					"name: " + name + "\n" +
 					"version: " + tag + "\n" +
 					"output:\n" +
-					"  kind: container\n" +
+					"  kind: docker\n" +
 					"  image: " + ctr
 
 				outputPath := canonicalDir + name + ".deployable.yml"
