@@ -174,11 +174,11 @@ func main() {
 					// create the release
 					release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
 
-					fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
-
 					if e != nil {
 						fmt.Println(e)
-						return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint.", 1)
+						return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint. Does Travis have permissions to your repository?", 1)
+					} else {
+						fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
 					}
 
 					// upload the release assets
