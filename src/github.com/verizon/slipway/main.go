@@ -42,7 +42,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slipway"
 	app.Version = currentVersion()
-	app.Copyright = "© " + strconv.Itoa(year) + " Verizon Labs"
+	app.Copyright = "© " + strconv.Itoa(year) + " Verizon"
 	app.Usage = "generate metadata and releases compatible with Nelson"
 	app.EnableBashCompletion = true
 
