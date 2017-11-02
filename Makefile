@@ -1,47 +1,48 @@
 
-TRAVIS_BUILD_NUMBER ?= 9999
-BINARY_NAME=slipway
-BINARY_FEATURE_VERSION=0.3
-BINARY_VERSION=${BINARY_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
-TGZ_NAME=${BINARY_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${BINARY_VERSION}.tar.gz
+PROGRAM_NAME=slipway
+
+TRAVIS_BUILD_NUMBER ?= dev
+CLI_FEATURE_VERSION ?= 1.0
+CLI_VERSION ?= ${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
 # if not set, then we're doing local development
 # as this will be set by the travis matrix for realz
 TARGET_PLATFORM ?= darwin
 TARGET_ARCH ?= amd64
+TAR_NAME = ${PROGRAM_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${CLI_VERSION}.tar.gz
 
-all: package
+install:
+	go get github.com/constabulary/gb/...
 
-devel:
-	go get github.com/constabulary/gb/... && \
+install-dev: install
 	go get github.com/codeskyblue/fswatch
+
+release: format test package
+
+compile: format
+	GOOS=${TARGET_PLATFORM} GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${CLI_VERSION}"
 
 watch:
 	fswatch
-
-format:
-	gofmt -l -w src/
-
-# compile for linux, but this binary is going to immedietly be stuffed
-# into an alpine linux image. if someone wants to build this thing for
-# themselves, then they can simply do: `gb build`
-compile: format
-	GOOS=${TARGET_PLATFORM} GOARCH=${TARGET_ARCH} CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${BINARY_VERSION}"
 
 test: compile
 	gb test -v
 
 package: test
-	mkdir target && \
-	mv bin/${BINARY_NAME}-${TARGET_PLATFORM}-amd64 ./${BINARY_NAME} && \
-	tar -zcvf ${TGZ_NAME} ${BINARY_NAME} && \
-	rm ${BINARY_NAME} && \
-	mv ${TGZ_NAME} target/${TGZ_NAME}
+	mkdir -p target && \
+	mv bin/${PROGRAM_NAME}-${TARGET_PLATFORM}-amd64 ./${PROGRAM_NAME} && \
+	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
+	rm ${PROGRAM_NAME} && \
+	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
+	shasum -c ${TAR_NAME}.sha1 && \
+	mv ${TAR_NAME} target/${TAR_NAME} && \
+	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
+
+format:
+	go fmt src/github.com/verizon/${PROGRAM_NAME}/*.go
 
 clean:
 	rm -rf bin && \
-	rm -rf pkg && \
-	rm -rf target
+	rm -rf pkg
 
-release:
-	git tag ${BINARY_VERSION} && \
-	git push --tags origin
+tar:
+	echo ${TAR_NAME}
