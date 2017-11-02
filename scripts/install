@@ -2,6 +2,9 @@
 
 set -e
 
+REPO_NAME=slipway
+PROGRAM_NAME=slipway
+
 ### Fetches and installs the latest nelson-cli from github.com
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
@@ -14,11 +17,11 @@ else
 fi
 
 function fetch_from_github(){
-  curl -s https://api.github.com/repos/verizon/nelson-cli/releases | grep browser_download_url | cut -d '"' -f 4 | grep $PLATFORM | head -n 2 
+  curl -s "https://api.github.com/repos/verizon/${REPO_NAME}/releases" | grep browser_download_url | cut -d '"' -f 4 | grep $PLATFORM | head -n 2
 }
 
 ARTIFACT_URL=$(fetch_from_github | grep -v 'sha1')
-ARTIFACT_BASE="nelson-${PLATFORM}"
+ARTIFACT_BASE="${PROGRAM_NAME}-${PLATFORM}"
 
 echo "====>> Downloading and extracting ${ARTIFACT_BASE}..."
 
@@ -37,11 +40,11 @@ echo "====>> Extracting..."
 
 tar xzf ${ARTIFACT_BASE}.tar.gz
 
-echo "====>> Copying nelson to /usr/local/bin..."
+echo "====>> Copying ${PROGRAM_NAME} to /usr/local/bin..."
 
 if [ -w /usr/local/bin ]; then
     SUDO=""
 else
     SUDO="sudo "
 fi
-$SUDO cp nelson /usr/local/bin
+$SUDO cp ${PROGRAM_NAME} /usr/local/bin
