@@ -53,4 +53,4 @@ deploy:
     secure: EhCYGwNLvp0OXly/LixObDrKn3mlUBm2+xjcfJ5EUXGJ7OfSplYg32KRsNH46Mk9AZBoVMsGBBoW0+TDun1op8ex0D3Vo+xF/umW6WLlLZIgmehj2rvFICQznwSckXfyRD6O4V0m1ieS/lUSdTNPfKCETw6/iupa/D5nIhnR/3CjqrMBod/LOVMspet3PmM53q4b1CLOG6P3g3n6JmfEhO6qk5KlsqAOalJ7sS+4WjgDutYnN8Hll/cBa0mk/fAuqk02DuxVMRm24/5Dz/HlIjh8Gme2+FanFLEITcm+8V0cmS+CZ0JFyN1zosqh7MclHsN8fhjfHjAc1j4YbRJo9AWhPLfqF9Ak/Rdwtf3fjPiHIIzv8/vxQqGZt2kUp/QM9z3CVU8XatUCB7iZEZWjwvQ4zHTZ2ZWBxUsJAGmp46Enyb7+HZx+Y2Rxichu2cmifcJAhhXTh2CVU5JJcSyP8FaZIeU9BH5f6+9J6eDkTBB/RE3YrCyCIxCSgyjm662SsUCURr09+/xytXLG8xlrGxnPzwCBekRo8pnbadDujEa3cjKwgzzPm4NoLNjZcGr527biXmGzbTQlZzNHdqaYcL4MAuFGo/35Ceq+GVvQavmltQG/ds3c9pjcW+ry2RpyFRCq5bloLtNysyk7kgBXTc9enMeS+aCjHhDA8HzYo+M=
   on:
     tags: true
-    repo: Verizon/nelson-cli
+    repo: Verizon/slipway
