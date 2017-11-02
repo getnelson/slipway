@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Verizon/slipway.svg?branch=master)](https://travis-ci.org/Verizon/slipway)
 [![Latest Release](https://img.shields.io/github/release/verizon/slipway.svg)](https://github.com/Verizon/slipway/releases)
 
-Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.com/verizon/slipway) deployment system.
+Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.com/verizon/nelson) deployment system.
 
 ## Instalation
 
@@ -18,9 +18,9 @@ This script will download and install the latest version and put it on your `$PA
 1. Fetch the latest version from Github
 2. Verify the SHA1 sum
 3. Extract the tarball
-4. Copy nelson to `/usr/local/bin/nelson`
+4. Copy `slipway` to `/usr/local/bin/slipway`
 
-It is safe to rerun this script to keep nelson-cli current. If you have the source code checked out locally, you need only execute: `scripts/install` to install the latest version of `slipway`.
+It is safe to rerun this script to keep `slipway` current. If you have the source code checked out locally, you need only execute: `scripts/install` to install the latest version of `slipway`.
 
 ## Usage
 
