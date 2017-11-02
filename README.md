@@ -1,12 +1,26 @@
 # Slipway
 
-[![Build Status](https://travis.oncue.verizon.net/iptv/slipway.svg?token=Lp2ZVD96vfT8T599xRfV)](https://travis.oncue.verizon.net/iptv/slipway)
+[![Build Status](https://travis-ci.org/Verizon/slipway.svg?branch=master)](https://travis-ci.org/Verizon/slipway)
+[![Latest Release](https://img.shields.io/github/release/verizon/slipway.svg)](https://github.com/Verizon/slipway/releases)
 
-Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.oncue.verizon.net/pages/iptv/nelson) deployment system.
+Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.com/verizon/slipway) deployment system.
 
 ## Instalation
 
-Download the latest release of slipway [from the internal nexus](http://nexus.oncue.verizon.net/nexus/content/groups/internal/verizon/inf/slipway/), and place the binary on your `$PATH`
+If you just want to use `slipway`, then run the following:
+
+```
+curl -GqL https://raw.githubusercontent.com/Verizon/slipway/master/scripts/install | bash
+```
+
+This script will download and install the latest version and put it on your `$PATH`. We do not endorse piping scripts from the wire to `bash`, and you should read the script before executing the command. It will:
+
+1. Fetch the latest version from Github
+2. Verify the SHA1 sum
+3. Extract the tarball
+4. Copy nelson to `/usr/local/bin/nelson`
+
+It is safe to rerun this script to keep nelson-cli current. If you have the source code checked out locally, you need only execute: `scripts/install` to install the latest version of `slipway`.
 
 ## Usage
 
@@ -33,10 +47,10 @@ slipway release -t 2.0.0 -d `pwd`/target
 
 # specify the github domain, tag, and input directory.
 # the repo slug will automatically be read from TRAVIS_REPO_SLUG
-slipway release -x github.oncue.verizon.net -t 2.0.0 -d `pwd`/target
+slipway release -x github.yourcompany.com -t 2.0.0 -d `pwd`/target
 
 # specify the github domain, tag, repo slug and input directory
-slipway release -x github.oncue.verizon.net -t 2.0.0 -r tim/sbt-release-sandbox -d `pwd`/target
+slipway release -x github.yourcompany.com -t 2.0.0 -r tim/sbt-release-sandbox -d `pwd`/target
 
 ```
 
@@ -46,21 +60,19 @@ As **Slipway** is a native binary, instalation is super simple and using it in T
 
 ```
 install:
-  - wget http://nexus.oncue.verizon.net/nexus/content/repositories/releases/verizon/inf/slipway/0.1.7/slipway-linux-amd64-0.1.7.tar.gz -O slipway.tar.gz
-  - tar xvf slipway.tar.gz
-  - mv slipway $HOME/slipway
+  - curl -GqL https://raw.githubusercontent.com/Verizon/slipway/master/scripts/install | bash
 
 script:
   - // do your build stuff
   # This assumes you are output docker images for internal consumption,
   # but essentially do whatever you need to in order to generate deployables
   # for each container you want to output from this repository
-  - docker images | grep docker.oncue.verizon.net | awk '{print $1 ":" $2}' | docker gen
+  - docker images | grep docker.yourcompany.com | awk '{print $1 ":" $2}' | slipway gen
   - |
     if [ $TRAVIS_PULL_REQUEST = 'false' ]; then
       git tag $RELEASE_VERSION &&
       git push --tags origin &&
-      slipway release -x github.oncue.verizon.net -t $RELEASE_VERSION -d `pwd`
+      slipway release -x github.yourcompany.com -t $RELEASE_VERSION -d `pwd`
     fi
 
 env:
