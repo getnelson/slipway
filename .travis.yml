@@ -1,0 +1,56 @@
+language: go
+
+go: 1.8
+
+branches:
+  except:
+    - /^*-[0-9]/
+
+install:
+  - make install
+
+before_script:
+  - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then git checkout -qf $TRAVIS_BRANCH; fi"
+
+script:
+  - |
+    if [ -z "$TRAVIS_TAG" ]; then
+      echo "Using TRAVIS_BUILD_NUMBER as revision..."
+      export CLI_VERSION="${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}";
+    else
+      echo "Using TRAVIS_TAG as revision..."
+      export CLI_VERSION="${TRAVIS_TAG}"
+    fi
+  - TARGET_PLATFORM=darwin make release
+  - TARGET_PLATFORM=linux make release
+
+env:
+  global:
+    - CLI_FEATURE_VERSION=0.9
+    - CLI_VERSION="${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}"
+    - secure: "CqCy43suRnKO3flLqWlEG4NB5zSVO9DlXTBQOd85Mf7dWTjuFYT8SsKbaAJisqqz3jGF4MO+aablQLzwrOgAlovHca0Eoi8kwVzJAzUoFk+Mm7MNQc1e0PW8XxCZwl3tBTIvEc5bHy58xsiABxrL4hvnR7zx64ET5spnrQabuVWLhk4dSrSftNVKfydMfOhxoDXuXapmLV89Pf0GJyc7UntgCG5M98Q0LBypshG1Mp07YP2fkRE62TvE7K7ipeipTZN6cEYUip7OzkB9c1WQRP6k8a6dYQ56zumAJhOs+DynXDgu/tF1zhisbEWXJsvDzx++obFpECTJeDQ2bZaGBD6J1/XcyMPU50HminMkGmwKva8xYMpYIEiM7UzAxZNg7hUNoOpA77jllhcY66+ZEmkrHsrTxgoOZE9V12NhwXrHZhjh+b0poolaXEwvY/gIZiuB+XlPNaSmtoSINLHKi9y4WHR4K4EHGQjVr8zCgA1VwYCoV9TmYxT3p7NLIjqx8dMbwl2tny3iRutKg95YYvC2Pg9ltaANw3/SlzrpsoDTG/dzWK3sC/UEBnheR/8EyhqxIA6+8EYq6fVOeiOqhnGYUgIQtpPjFQVN5YGaeNo4v9ksjD3XA5N2Y37aGUmJLZiAFdlZOTNPT6yk61fQowYaHkxvDA8d9p6FKTgo5Sk="
+
+# if this isnt a PR, and we're building the master branch *only*, then lets tag
+# this version which will in turn trigger another build that the github release
+# will be cut from.
+after_success:
+- |
+  if [ $TRAVIS_PULL_REQUEST = 'false' ]; then
+    if [ $TRAVIS_BRANCH = 'master' ]; then
+      git config --global user.email "builds@travis-ci.com"
+      git config --global user.name "Travis CI"
+      git tag ${CLI_VERSION} -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
+      git push -q https://$GIT_CREDENTIAL@github.com/Verizon/slipway --tags
+    fi
+  fi
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  file_glob: true
+  file: target/*
+  api_key:
+    secure: oJ095mwH0Eic/2MnKOBG0/4FwvFag7lz356vE5pOwXuGP9FQRq9AsuhhCuweRK6wc/cOc4qKEjYXv2TQMF6W716HzGNXJhe72PDX+MSx6QHL+PY2DnUUVaBEl3CG82p0XWAkEeO/pKX/3DjqhehazSVZZNj+s4bGj1I5HzdOQX85yAHtugFeNXmIUbpRTu1M53DpTny4K3dUu9CSyFLA5lqs/uhpIg9FsVkgEaJFijbvgH8kuUyLUSHCDhUD6JQRhhG+f5TYOn6+mOhxC1QLN1kzwh5Kvviw0UfB0h4QPPv6qbuqixwXTzcphWr5Bvvd0vjyd8Dwp5grRqQcUJLI7ACUfbx2C1qEAwgST3BZ45BLyKt51Cf37Yv8ngtjkMqinKh8wmhYU/ibyldc05S5mFR36SZg41BM5wvmQWginLKrb3pOjHIePHAu0LMGGoSKsPoR5lwCD9b4rdajCYlu/glyDh8cfAIWUmfIvKq1eJJJ2Iv/uZGFTQWcc5W4w+EwynUR52HKs5iFbVns/PPqNWeRlGGnFFwKWlCUWX5nriJt7eAF/SPCB1Y/d8TxrE4vwOFQwqtJU3iwMSTCAQymSkh5KQSXd+7NFenUNqZ7SurVDPBNIN1QDU0loFyNJJXXqSu9VYn/aZRn0PQtDUH9gWp/Oy97IzWTMMcZU2jsNlo=
+  on:
+    tags: true
+    repo: Verizon/slipway
