@@ -1,16 +1,16 @@
 # Slipway
 
-[![Build Status](https://travis-ci.org/Verizon/slipway.svg?branch=master)](https://travis-ci.org/Verizon/slipway)
-[![Latest Release](https://img.shields.io/github/release/verizon/slipway.svg)](https://github.com/Verizon/slipway/releases)
+[![Build Status](https://travis-ci.org/getnelson/slipway.svg?branch=master)](https://travis-ci.org/getnelson/slipway)
+[![Latest Release](https://img.shields.io/github/release/getnelson/slipway.svg)](https://github.com/getnelson/slipway/releases)
 
-Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.com/verizon/nelson) deployment system.
+Slipway provides a small, native binary that creates Github releases and the associated metadata needed for the [Nelson](https://github.com/getnelson/nelson) deployment system.
 
 ## Instalation
 
 If you just want to use `slipway`, then run the following:
 
 ```
-curl -GqL https://raw.githubusercontent.com/Verizon/slipway/master/scripts/install | bash
+curl -GqL https://raw.githubusercontent.com/getnelson/slipway/master/scripts/install | bash
 ```
 
 This script will download and install the latest version and put it on your `$PATH`. We do not endorse piping scripts from the wire to `bash`, and you should read the script before executing the command. It will:
@@ -60,7 +60,7 @@ As **Slipway** is a native binary, instalation is super simple and using it in T
 
 ```
 install:
-  - curl -GqL https://raw.githubusercontent.com/Verizon/slipway/master/scripts/install | bash
+  - curl -GqL https://raw.githubusercontent.com/getnelson/slipway/master/scripts/install | bash
 
 script:
   - // do your build stuff

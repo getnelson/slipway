@@ -38,7 +38,7 @@ package: test
 	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
 
 format:
-	go fmt src/github.com/verizon/${PROGRAM_NAME}/*.go
+	go fmt src/github.com/getnelson/${PROGRAM_NAME}/*.go
 
 clean:
 	rm -rf bin && \
