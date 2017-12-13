@@ -17,7 +17,7 @@ else
 fi
 
 function fetch_from_github(){
-  curl -s "https://api.github.com/repos/verizon/${REPO_NAME}/releases" | grep browser_download_url | cut -d '"' -f 4 | grep $PLATFORM | head -n 2
+  curl -s "https://api.github.com/repos/getnelson/${REPO_NAME}/releases" | grep browser_download_url | cut -d '"' -f 4 | grep $PLATFORM | head -n 2
 }
 
 ARTIFACT_URL=$(fetch_from_github | grep -v 'sha1')
