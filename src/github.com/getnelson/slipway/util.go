@@ -59,8 +59,9 @@ func findDeployableFilesInDir(path string) ([]string, error) {
 		desired := []string{}
 
 		for _, file := range files {
-			if strings.HasSuffix(file.Name(), ".deployable.yml") && file.IsDir() == false {
-				desired = append(desired, path+"/"+file.Name())
+			filename := file.Name()
+			if (strings.HasSuffix(filename, ".deployable.yml") || strings.HasSuffix(filename, ".deployable.yaml")) && file.IsDir() == false {
+				desired = append(desired, path+"/"+filename)
 			}
 		}
 
