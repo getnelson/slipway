@@ -30,9 +30,7 @@ type Credentials struct {
 	Token    string
 }
 
-func loadGithubCredentials() (cred Credentials, err []error) {
-	location := os.Getenv("HOME") + "/.github"
-
+func loadGithubCredentials(location string) (cred Credentials, err []error) {
 	if _, err := os.Stat(location); err == nil {
 		p := properties.MustLoadFile(location, properties.UTF8)
 		user := p.MustGetString("github.login")
