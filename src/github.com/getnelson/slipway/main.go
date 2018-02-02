@@ -51,6 +51,7 @@ func main() {
 	var userGithubHost string
 	var userGithubTag string
 	var userGithubRepoSlug string
+	var credentialsLocation string
 
 	app.Commands = []cli.Command{
 		////////////////////////////// DEPLOYABLE //////////////////////////////////
@@ -139,6 +140,12 @@ func main() {
 					Usage:       "directory of .deployable.yml files to upload",
 					Destination: &userDirectory,
 				},
+				cli.StringFlag{
+					Name:        "creds, c",
+					Value:       os.Getenv("HOME") + "/.github",
+					Usage:       "GitHub credentials file",
+					Destination: &credentialsLocation,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				// deployables =
@@ -171,7 +178,7 @@ func main() {
 					}
 				}
 
-				credentials, err := loadGithubCredentials()
+				credentials, err := loadGithubCredentials(credentialsLocation)
 				if err == nil {
 					gh := buildGithubClient(userGithubHost, credentials)
 
