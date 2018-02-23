@@ -52,6 +52,7 @@ func main() {
 	var userGithubTag string
 	var userGithubRepoSlug string
 	var credentialsLocation string
+	var targetBranch string
 
 	app.Commands = []cli.Command{
 		////////////////////////////// DEPLOYABLE //////////////////////////////////
@@ -146,6 +147,12 @@ func main() {
 					Usage:       "GitHub credentials file",
 					Destination: &credentialsLocation,
 				},
+				cli.StringFlag{
+					Name:        "branch, b",
+					Value:       "",
+					Usage:       "branch to base release off of",
+					Destination: &targetBranch,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				// deployables =
@@ -183,13 +190,12 @@ func main() {
 					gh := buildGithubClient(userGithubHost, credentials)
 
 					name := GenerateRandomName()
-					commitish := "master"
 					isDraft := true
 
 					// release structure
 					r := github.RepositoryRelease{
 						TagName:         &userGithubTag,
-						TargetCommitish: &commitish,
+						TargetCommitish: &targetBranch,
 						Name:            &name,
 						Draft:           &isDraft,
 					}
