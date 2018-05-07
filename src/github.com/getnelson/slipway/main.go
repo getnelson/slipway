@@ -221,6 +221,8 @@ func main() {
 
 					if xxx != nil {
 						fmt.Println(xxx)
+						fmt.Println("Error encountered, cleaning up release...")
+						gh.Repositories.DeleteRelease(owner, reponame, *release.ID)
 						return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
 					}
 
