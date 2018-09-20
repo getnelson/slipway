@@ -20,11 +20,10 @@ import (
 	"testing"
 )
 
-func TestUnitNameExtractor(t *testing.T) {
-	e1 := "aloha"
-	e2 := "1.0.9"
-	provided := "docker.oncue.verizon.net/units/aloha-1.0:1.0.9"
-	last, tag := getUnitNameFromDockerContainer(provided)
+func checkUnitNameFromImage(image string, oImage string, oTag string, t *testing.T) {
+	e1 := oImage
+	e2 := oTag
+	last, tag := getUnitNameFromDockerContainer(image)
 
 	if tag != e2 {
 		t.Error(tag, e2)
@@ -32,4 +31,9 @@ func TestUnitNameExtractor(t *testing.T) {
 	if last != e1 {
 		t.Error(last, e1)
 	}
+}
+
+func TestUnitNameExtractor(t *testing.T) {
+	checkUnitNameFromImage("docker.yourcompany.com/units/aloha-1.0:1.0.9", "aloha", "1.0.9", t)
+	checkUnitNameFromImage("docker.yourcompany.com/units/aloha:1.0.9", "aloha", "1.0.9", t)
 }

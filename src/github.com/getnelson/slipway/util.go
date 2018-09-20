@@ -73,7 +73,7 @@ func findDeployableFilesInDir(path string) ([]string, error) {
 /*
  * this function is pretty basic, and really only splits
  * the following case:
- * your.docker.com/foo/bar:1.2.3
+ * your.docker.com/foo/bar-1.0:1.2.3
  *
  * The author fully reconizes that this is fucking janky
  * and does not cover all the possible use cases for a docker
@@ -87,8 +87,15 @@ func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
 	tag := arr[len(arr)-1]
 	name := strings.Split(image, "/")
 	last := name[len(name)-1]
-	fev := re.FindStringSubmatch(last)[1]
-	sanitzed := strings.Replace(last, fev, "", 1)
+
+	fev := re.FindStringSubmatch(last)
+	var sanitzed string
+
+	if len(fev) >= 1 {
+		sanitzed = strings.Replace(last, fev[1], "", 1)
+	} else {
+		sanitzed = last
+	}
 
 	return sanitzed, tag
 }
