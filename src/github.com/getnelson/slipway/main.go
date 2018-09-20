@@ -143,7 +143,6 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:        "creds, c",
-					Value:       os.Getenv("HOME") + "/.github",
 					Usage:       "GitHub credentials file",
 					Destination: &credentialsLocation,
 				},
@@ -185,63 +184,79 @@ func main() {
 					}
 				}
 
-				credentials, err := loadGithubCredentials(credentialsLocation)
-				if err == nil {
-					gh := buildGithubClient(userGithubHost, credentials)
+				var credentials Credentials
+				envUser := os.Getenv("GITHUB_USERNAME")
+				envToken := os.Getenv("GITHUB_TOKEN")
 
-					name := GenerateRandomName()
-					isDraft := true
-
-					// release structure
-					r := github.RepositoryRelease{
-						TagName:         &userGithubTag,
-						TargetCommitish: &targetBranch,
-						Name:            &name,
-						Draft:           &isDraft,
+				// if the user did not explictly tell us where the credentials file
+				// is located, and we have a GITHUB_TOKEN in the environment, lets use
+				// the GITHUB_TOKEN and GITHUB_USERNAME
+				if len(envUser) > 0 &&
+					len(envToken) > 0 &&
+					len(credentialsLocation) < 1 {
+					credentials = Credentials{
+						Username: envUser,
+						Token:    envToken,
 					}
-
-					// create the release
-					release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
-
-					if e != nil {
-						fmt.Println(e)
-						return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint. Does Travis have permissions to your repository?", 1)
-					} else {
-						fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
+				} else if len(credentialsLocation) > 0 {
+					loaded, err := loadGithubCredentials(credentialsLocation)
+					if err == nil {
+						credentials = loaded
 					}
-
-					// upload the release assets
-					for _, path := range deployablePaths {
-						slices := strings.Split(path, "/")
-						name := slices[len(slices)-1]
-						file, _ := os.Open(path)
-
-						fmt.Println("Uploading " + name + " as a release asset...")
-
-						opt := &github.UploadOptions{Name: name}
-						gh.Repositories.UploadReleaseAsset(owner, reponame, *release.ID, opt, file)
-					}
-
-					fmt.Println("Promoting release from a draft to offical release...")
-
-					// mutability ftw?
-					isDraft = false
-					r2 := github.RepositoryRelease{
-						Draft: &isDraft,
-					}
-
-					_, _, xxx := gh.Repositories.EditRelease(owner, reponame, *release.ID, &r2)
-
-					if xxx != nil {
-						fmt.Println(xxx)
-						fmt.Println("Error encountered, cleaning up release...")
-						gh.Repositories.DeleteRelease(owner, reponame, *release.ID)
-						return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
-					}
-
 				} else {
-					fmt.Println(err)
-					return cli.NewExitError("Unable to load github credentials. Please ensure you have a valid properties file at $HOME/.github", 1)
+					return cli.NewExitError("Slipway requires credentials either in the environment (GITHUB_USERNAME and GITHUB_TOKEN) or specified with a file path using the -c flag.", 1)
+				}
+
+				gh := buildGithubClient(userGithubHost, credentials)
+
+				name := GenerateRandomName()
+				isDraft := true
+
+				// release structure
+				r := github.RepositoryRelease{
+					TagName:         &userGithubTag,
+					TargetCommitish: &targetBranch,
+					Name:            &name,
+					Draft:           &isDraft,
+				}
+
+				// create the release
+				release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
+
+				if e != nil {
+					fmt.Println(e)
+					return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint. Does Travis have permissions to your repository?", 1)
+				} else {
+					fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
+				}
+
+				// upload the release assets
+				for _, path := range deployablePaths {
+					slices := strings.Split(path, "/")
+					name := slices[len(slices)-1]
+					file, _ := os.Open(path)
+
+					fmt.Println("Uploading " + name + " as a release asset...")
+
+					opt := &github.UploadOptions{Name: name}
+					gh.Repositories.UploadReleaseAsset(owner, reponame, *release.ID, opt, file)
+				}
+
+				fmt.Println("Promoting release from a draft to offical release...")
+
+				// mutability ftw?
+				isDraft = false
+				r2 := github.RepositoryRelease{
+					Draft: &isDraft,
+				}
+
+				_, _, xxx := gh.Repositories.EditRelease(owner, reponame, *release.ID, &r2)
+
+				if xxx != nil {
+					fmt.Println(xxx)
+					fmt.Println("Error encountered, cleaning up release...")
+					gh.Repositories.DeleteRelease(owner, reponame, *release.ID)
+					return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
 				}
 
 				return nil
