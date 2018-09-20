@@ -132,13 +132,14 @@ func main() {
 				cli.StringFlag{
 					Name:        "tag, t",
 					Value:       "",
-					Usage:       "host of the github api endpoint",
+					Usage:       "Git tag to use for this release",
 					Destination: &userGithubTag,
 				},
 				cli.StringFlag{
 					Name:        "dir, d",
 					Value:       "",
-					Usage:       "directory of .deployable.yml files to upload",
+					Usage:       "Path to the directory where *.deployable.yml files to upload can be found",
+					EnvVar:      "PWD",
 					Destination: &userDirectory,
 				},
 				cli.StringFlag{
@@ -149,13 +150,11 @@ func main() {
 				cli.StringFlag{
 					Name:        "branch, b",
 					Value:       "",
-					Usage:       "branch to base release off of",
+					Usage:       "Branch to base release off from",
 					Destination: &targetBranch,
 				},
 			},
 			Action: func(c *cli.Context) error {
-				// deployables =
-
 				if len(userGithubTag) <= 0 {
 					return cli.NewExitError("You must specifiy a `--tag` or a `-t` to create releases.", 1)
 				}
