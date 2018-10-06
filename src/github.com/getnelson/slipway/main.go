@@ -17,6 +17,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/google/go-github/github"
 	"gopkg.in/urfave/cli.v1"
@@ -268,6 +270,13 @@ func main() {
 					Destination: &userGithubTag,
 				},
 				cli.StringFlag{
+					Name:        "dir, d",
+					Value:       "",
+					Usage:       "Path to the directory where *.deployable.yml files to upload can be found",
+					EnvVar:      "PWD",
+					Destination: &userDirectory,
+				},
+				cli.StringFlag{
 					Name:        "creds, c",
 					Usage:       "GitHub credentials file",
 					Destination: &credentialsLocation,
@@ -308,8 +317,25 @@ func main() {
 				}
 
 				gh := buildGithubClient(userGithubHost, credentials)
+
+				// here we're taking any of the deployable files that we can find
+				// in the specified directory and then encoding them as base64,
+				// before packing them into a JSON array (as required by the Github
+				// deployment api), with the intention that Nelson gets this payload
+				// and can decode the deployables as-is, using its existing decoders.
+				encodedDeployables := []string{}
+				for _, path := range deployablePaths {
+					cnts, err := ioutil.ReadFile(path)
+					if err != nil {
+						return cli.NewExitError("Could not read deployable at "+path, 1)
+					}
+					encoded := base64.StdEncoding.EncodeToString(cnts)
+					encodedDeployables = append(encodedDeployables, encoded)
+				}
+
 				task := "deploy"
-				payload := "{ \"foo\": true }"
+				bytes, _ := json.Marshal(encodedDeployables)
+				payload := string(bytes)
 
 				r := github.DeploymentRequest{
 					Ref:     &userGithubTag,
