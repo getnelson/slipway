@@ -49,10 +49,41 @@ slipway release -t 2.0.0 -d `pwd`/target
 # the repo slug will automatically be read from TRAVIS_REPO_SLUG
 slipway release -x github.yourcompany.com -t 2.0.0 -d `pwd`/target
 
+# specify the github domain, tag, and a properties file for github credentials.
+# the repo slug will automatically be read from TRAVIS_REPO_SLUG
+slipway release -x github.yourcompany.com -t 2.0.0 -c /path/to/credentials
+
 # specify the github domain, tag, repo slug and input directory
-slipway release -x github.yourcompany.com -t 2.0.0 -r tim/sbt-release-sandbox -d `pwd`/target
+slipway release -x github.yourcompany.com -t 2.0.0 -r getnelson/howdy -d `pwd`/target
 
 ```
+
+Create a [Github deployment](https://developer.github.com/v3/repos/deployments/), encoding any `*.deployable.yml` files into the `payload` field (as directed by Github API):
+
+```
+# specify the branch to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
+slipway deploy --ref master
+
+# specify the tag to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
+slipway deploy -t 2.0.0
+
+# specify the repo and an exact SHA to use for the deployment:
+slipway deploy --ref fdb7da2ab3b2cd172e86c1af9adefa3523f6d65b  -r getnelson/howdy
+
+# specify the github domain, tag, repo slug and input directory
+slipway deploy -x github.yourcompany.com -t 2.0.0 -r getnelson/howdy -d `pwd`/target
+```
+
+### Authentication
+
+In the event you wish to read Github credentials for **Slipway** from a file, the format of that file must be something like this:
+
+```
+github.login=username
+github.token=XXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+This is a [classic Java properties format](https://www.mkyong.com/java/java-properties-file-examples/) - essentialy key=value pairs delimited by the equals sign. Whilst this functionality is supported, the authors recommend that credentials are instead retrieved from the shell environment, instead of being persisted to a plaintext file.
 
 ## Using with Travis
 
@@ -90,5 +121,5 @@ That's all there is to it.
 1. `alias fswatch="$GOPATH/bin/fswatch"
 1. `make watch`
 
-This should give continous compilation without the tedious need to constantly restart `gb build`
 
+This should give continous compilation without the tedious need to constantly restart `gb build`

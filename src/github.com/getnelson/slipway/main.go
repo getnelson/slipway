@@ -17,6 +17,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/google/go-github/github"
 	"gopkg.in/urfave/cli.v1"
@@ -42,7 +44,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slipway"
 	app.Version = currentVersion()
-	app.Copyright = "© " + strconv.Itoa(year) + " Verizon"
+	app.Copyright = "© " + strconv.Itoa(year) + " Nelson Team"
 	app.Usage = "generate metadata and releases compatible with Nelson"
 	app.EnableBashCompletion = true
 
@@ -113,7 +115,7 @@ func main() {
 		},
 		{
 			Name:  "release",
-			Usage: "generate deployable metdata for units",
+			Usage: "create a Github release for the given repo + tag",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:        "endpoint, x",
@@ -125,7 +127,7 @@ func main() {
 				cli.StringFlag{
 					Name:        "repo, r",
 					Value:       "",
-					Usage:       "the repository in question, e.g. verizon/knobs",
+					Usage:       "the repository in question, e.g. getnelson/nelson",
 					EnvVar:      "TRAVIS_REPO_SLUG",
 					Destination: &userGithubRepoSlug,
 				},
@@ -183,27 +185,9 @@ func main() {
 					}
 				}
 
-				var credentials Credentials
-				envUser := os.Getenv("GITHUB_USERNAME")
-				envToken := os.Getenv("GITHUB_TOKEN")
-
-				// if the user did not explictly tell us where the credentials file
-				// is located, and we have a GITHUB_TOKEN in the environment, lets use
-				// the GITHUB_TOKEN and GITHUB_USERNAME
-				if len(envUser) > 0 &&
-					len(envToken) > 0 &&
-					len(credentialsLocation) < 1 {
-					credentials = Credentials{
-						Username: envUser,
-						Token:    envToken,
-					}
-				} else if len(credentialsLocation) > 0 {
-					loaded, err := loadGithubCredentials(credentialsLocation)
-					if err == nil {
-						credentials = loaded
-					}
-				} else {
-					return cli.NewExitError("Slipway requires credentials either in the environment (GITHUB_USERNAME and GITHUB_TOKEN) or specified with a file path using the -c flag.", 1)
+				credentials, errs := getRuntimeCredentials(credentialsLocation)
+				if errs != nil {
+					return cli.NewMultiError(errs...)
 				}
 
 				gh := buildGithubClient(userGithubHost, credentials)
@@ -261,8 +245,146 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "deploy",
+			Usage: "create a Github deployment for a given repository",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "endpoint, x",
+					Value:       "",
+					Usage:       "domain of the github api endpoint",
+					EnvVar:      "GITHUB_ADDR",
+					Destination: &userGithubHost,
+				},
+				cli.StringFlag{
+					Name:        "repo, r",
+					Value:       "",
+					Usage:       "the repository in question, e.g. getnelson/nelson",
+					EnvVar:      "TRAVIS_REPO_SLUG",
+					Destination: &userGithubRepoSlug,
+				},
+				cli.StringFlag{
+					Name:        "ref, t, s",
+					Value:       "",
+					Usage:       "Git tag to use for this release",
+					Destination: &userGithubTag,
+				},
+				cli.StringFlag{
+					Name:        "dir, d",
+					Value:       "",
+					Usage:       "Path to the directory where *.deployable.yml files to upload can be found",
+					EnvVar:      "PWD",
+					Destination: &userDirectory,
+				},
+				cli.StringFlag{
+					Name:        "creds, c",
+					Usage:       "GitHub credentials file",
+					Destination: &credentialsLocation,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				if len(userGithubTag) <= 0 {
+					return cli.NewExitError("You must specifiy a `--ref`, `-s` or `-t` with a git references (SHA, tag name or branch name).", 1)
+				}
+				if len(userGithubRepoSlug) <= 0 {
+					return cli.NewExitError("You must specifiy a `--repo` or a `-r` denoting the repository to deploy from.", 1)
+				}
+
+				splitarr := strings.Split(userGithubRepoSlug, "/")
+				if len(splitarr) != 2 {
+					return cli.NewExitError("The specified repository name was not of the format 'foo/bar'", 1)
+				}
+
+				owner := splitarr[0]
+				reponame := splitarr[1]
+
+				deployablePaths, direrr := findDeployableFilesInDir(userDirectory)
+
+				if len(userDirectory) != 0 {
+					// if you specified a dir, but it was not readable or it didnt exist
+					if direrr != nil {
+						return cli.NewExitError("Unable to read from "+userDirectory+"; check the location exists and is readable.", 1)
+					}
+					// if you specify a dir, and it was readable, but there were no deployable files
+					if len(deployablePaths) <= 0 {
+						return cli.NewExitError("Readable directory "+userDirectory+" contained no '.deployable.yml' files.", 1)
+					}
+				}
+
+				credentials, errs := getRuntimeCredentials(credentialsLocation)
+				if errs != nil {
+					return cli.NewMultiError(errs...)
+				}
+
+				gh := buildGithubClient(userGithubHost, credentials)
+
+				// here we're taking any of the deployable files that we can find
+				// in the specified directory and then encoding them as base64,
+				// before packing them into a JSON array (as required by the Github
+				// deployment api), with the intention that Nelson gets this payload
+				// and can decode the deployables as-is, using its existing decoders.
+				encodedDeployables := []string{}
+				for _, path := range deployablePaths {
+					cnts, err := ioutil.ReadFile(path)
+					if err != nil {
+						return cli.NewExitError("Could not read deployable at "+path, 1)
+					}
+					encoded := base64.StdEncoding.EncodeToString(cnts)
+					encodedDeployables = append(encodedDeployables, encoded)
+				}
+
+				task := "deploy"
+				bytes, _ := json.Marshal(encodedDeployables)
+				payload := string(bytes)
+
+				r := github.DeploymentRequest{
+					Ref:     &userGithubTag,
+					Task:    &task,
+					Payload: &payload,
+				}
+
+				deployment, _, errors := gh.Repositories.CreateDeployment(owner, reponame, &r)
+
+				if errors != nil {
+					return cli.NewMultiError(errors)
+				}
+
+				fmt.Println("Created deployment " + strconv.Itoa(*deployment.ID) + " on " + owner + "/" + reponame)
+
+				return nil
+			},
+		},
 	}
 
 	// run it!
 	app.Run(os.Args)
+}
+
+func getRuntimeCredentials(credentialsLocation string) (Credentials, []error) {
+	var credentials Credentials
+	envUser := os.Getenv("GITHUB_USERNAME")
+	envToken := os.Getenv("GITHUB_TOKEN")
+
+	// if the user did not explictly tell us where the credentials file
+	// is located, and we have a GITHUB_TOKEN in the environment, lets use
+	// the GITHUB_TOKEN and GITHUB_USERNAME
+	if len(envUser) > 0 &&
+		len(envToken) > 0 &&
+		len(credentialsLocation) < 1 {
+		credentials = Credentials{
+			Username: envUser,
+			Token:    envToken,
+		}
+	} else if len(credentialsLocation) > 0 {
+		loaded, err := loadGithubCredentials(credentialsLocation)
+		if err == nil {
+			credentials = loaded
+		}
+	} else {
+		errs := []error{}
+		errs = append(errs, cli.NewExitError("Slipway requires credentials either in the environment (GITHUB_USERNAME and GITHUB_TOKEN) or specified with a file path using the -c flag.", 1))
+		return credentials, errs
+	}
+
+	return credentials, nil
 }
