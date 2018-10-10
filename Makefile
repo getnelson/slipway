@@ -12,46 +12,48 @@ CLI_VERSION ?= ${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
 # as this will be set by the travis matrix for realz
 TARGET_PLATFORM ?= darwin
 TARGET_ARCH ?= amd64
-TAR_NAME = ${PROGRAM_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${CLI_VERSION}.tar.gz
+BINARY_NAME := ${PROGRAM_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${CLI_VERSION}
+TAR_NAME = ${BINARY_NAME}.tar.gz
 
 SHELL 	:= /bin/bash
 BINDIR	:= bin
-PKG 		:= github.com/envoyproxy/go-control-plane
+PKG 		:= github.com/getnelson/slipway
 GOFILES	 = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GODIRS	 = $(shell go list -f '{{.Dir}}' ./... \
 						| grep -vFf <(go list -f '{{.Dir}}' ./vendor/...))
 
-release: format test package
+# release: format test package
 
-compile: format
-	GOOS=${TARGET_PLATFORM} GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${CLI_VERSION}"
+# compile: format
+# 	GOOS=${TARGET_PLATFORM} GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${CLI_VERSION}"
 
-watch:
-	fswatch
+# watch:
+# 	fswatch
 
 # test: compile
 # 	gb test -v
 
-package: test
-	mkdir -p target && \
-	mv bin/${PROGRAM_NAME}-${TARGET_PLATFORM}-amd64 ./${PROGRAM_NAME} && \
-	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
-	rm ${PROGRAM_NAME} && \
-	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
-	shasum -c ${TAR_NAME}.sha1 && \
-	mv ${TAR_NAME} target/${TAR_NAME} && \
-	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
-
-format:
-	go fmt src/github.com/getnelson/${PROGRAM_NAME}/*.go
-
-tar:
-	echo ${TAR_NAME}
+# package: test
+# 	mkdir -p target && \
+# 	mv bin/${PROGRAM_NAME}-${TARGET_PLATFORM}-amd64 ./${PROGRAM_NAME} && \
+# 	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
+# 	rm ${PROGRAM_NAME} && \
+# 	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
+# 	shasum -c ${TAR_NAME}.sha1 && \
+# 	mv ${TAR_NAME} target/${TAR_NAME} && \
+# 	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
 
 .PHONY: build
 build: vendor
 	@echo "--> building"
-	@go build ./...
+	GOOS=${TARGET_PLATFORM} GOARCH=${TARGET_ARCH} CGO_ENABLED=0 \
+	go build -o $(BINDIR)/$(BINARY_NAME) -ldflags "-X main.globalBuildVersion=${CLI_VERSION}" \
+	./...
+
+.PHONY: watch
+watch:
+	@echo "--> watching for changed files"
+	@fswatch
 
 .PHONY: clean
 clean:
@@ -61,7 +63,12 @@ clean:
 .PHONY: test
 test: vendor
 	@echo "--> running unit tests"
-	@go test ./pkg/...
+	@go test ./cmd/...
+
+.PHONY: format
+format: tools.goimports
+	@echo "--> formatting code with 'goimports' tool"
+	@goimports -local $(PKG) -w -l $(GOFILES)
 
 .PHONY: lint
 lint: tools.golint
@@ -79,6 +86,7 @@ generate:
 #------------------
 #-- dependencies
 #------------------
+
 .PHONY: depend.update depend.install
 
 depend.update: tools.glide
@@ -121,4 +129,10 @@ tools.glide:
 	@command -v glide >/dev/null ; if [ $$? -ne 0 ]; then \
 		echo "--> installing glide"; \
 		curl https://glide.sh/get | sh; \
+	fi
+
+tools.goimports:
+	@command -v goimports >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing goimports"; \
+		go get golang.org/x/tools/cmd/goimports; \
 	fi
