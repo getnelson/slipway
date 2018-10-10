@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_binary(
+    name = "slipway",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "github.go",
+        "main.go",
+        "namer.go",
+        "util.go",
+    ],
+    importpath = "github.com/example/project/src/github.com/getnelson/slipway",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//src/github.com/getnelson/slipway/vendor/github.com/google/go-github/github:go_default_library",
+        "//src/github.com/getnelson/slipway/vendor/gopkg.in/magiconair/properties.v1:go_default_library",
+        "//src/github.com/getnelson/slipway/vendor/gopkg.in/urfave/cli.v1:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["util_test.go"],
+    embed = [":go_default_library"],
+)
