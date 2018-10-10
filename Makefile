@@ -17,31 +17,27 @@ TAR_NAME = ${BINARY_NAME}.tar.gz
 
 SHELL 	:= /bin/bash
 BINDIR	:= bin
-PKG 		:= github.com/getnelson/slipway
+PKG 		:= github.com/getnelson/${PROGRAM_NAME}
 GOFILES	 = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GODIRS	 = $(shell go list -f '{{.Dir}}' ./... \
 						| grep -vFf <(go list -f '{{.Dir}}' ./vendor/...))
 
-# release: format test package
+.PHONY: release
+release: format test package
 
-# compile: format
-# 	GOOS=${TARGET_PLATFORM} GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${CLI_VERSION}"
+.PHONY: ci
+ci: format test package
 
-# watch:
-# 	fswatch
-
-# test: compile
-# 	gb test -v
-
-# package: test
-# 	mkdir -p target && \
-# 	mv bin/${PROGRAM_NAME}-${TARGET_PLATFORM}-amd64 ./${PROGRAM_NAME} && \
-# 	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
-# 	rm ${PROGRAM_NAME} && \
-# 	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
-# 	shasum -c ${TAR_NAME}.sha1 && \
-# 	mv ${TAR_NAME} target/${TAR_NAME} && \
-# 	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
+.PHONY: package
+package: test build
+	mkdir -p target && \
+	mv bin/${BINARY_NAME} ./${PROGRAM_NAME} && \
+	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
+	rm ${PROGRAM_NAME} && \
+	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
+	shasum -c ${TAR_NAME}.sha1 && \
+	mv ${TAR_NAME} target/${TAR_NAME} && \
+	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
 
 .PHONY: build
 build: vendor
@@ -79,21 +75,21 @@ lint: tools.golint
 #-- code generaion
 #-------------------
 
-generate:
+generate: $(BINDIR)/gogofast $(BINDIR)/validate
 	@echo "--> generating pb.go files"
-	$(SHELL) build/generate_protos.sh
+	$(SHELL) scripts/generate-protos
 
 #------------------
 #-- dependencies
 #------------------
 
-.PHONY: depend.update depend.install
+.PHONY: deps.update deps.install
 
-depend.update: tools.glide
+deps.update: tools.glide
 	@echo "--> updating dependencies from glide.yaml"
 	@glide update
 
-depend.install: tools.glide
+deps.install: tools.glide
 	@echo "--> installing dependencies from glide.lock "
 	@glide install
 
@@ -136,3 +132,11 @@ tools.goimports:
 		echo "--> installing goimports"; \
 		go get golang.org/x/tools/cmd/goimports; \
 	fi
+
+$(BINDIR)/gogofast: vendor
+	@echo "--> building $@"
+	@go build -o $@ vendor/github.com/gogo/protobuf/protoc-gen-gogofast/main.go
+
+$(BINDIR)/validate: vendor
+	@echo "--> building $@"
+	@go build -o $@ vendor/github.com/lyft/protoc-gen-validate/main.go
