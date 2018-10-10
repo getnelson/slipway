@@ -28,3 +28,4 @@ pkg/*
 
 target
 *.deployable.yml
+bazel-*
