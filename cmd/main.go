@@ -50,6 +50,9 @@ func main() {
 	app.Usage = "generate metadata and releases compatible with Nelson"
 	app.EnableBashCompletion = true
 
+	const NLDP string = "nldp"
+	const YAML string = "yml"
+
 	// switches for the cli
 	var (
 		userDirectory       string
@@ -76,7 +79,7 @@ func main() {
 				cli.StringFlag{
 					Name:        "format, f",
 					Value:       "yaml",
-					Usage:       "Encoding format to use; present options are 'yaml' or 'proto'",
+					Usage:       "Encoding format to use; present options are '"+YAML+"' or '"+NLDP+"'",
 					Destination: &genEncodingMode,
 				},
 			},
@@ -86,8 +89,8 @@ func main() {
 					return cli.NewExitError("You must specify the name of a docker container in order to generate Nelson deployable yml.", 1)
 				}
 
-				if genEncodingMode != "yaml" && genEncodingMode != "proto" {
-					return cli.NewExitError("When specifying an encoding, only 'proto' or 'yaml' are allowed. The '"+genEncodingMode+"' type is not supported.", 1)
+				if genEncodingMode != YAML && genEncodingMode != NLDP {
+					return cli.NewExitError("When specifying an encoding, only '"+YAML+"' or '"+NLDP+"' are allowed. The '"+genEncodingMode+"' type is not supported.", 1)
 				}
 
 				if len(userDirectory) <= 0 {
@@ -116,8 +119,8 @@ func main() {
 				var outputPath string
 				var encoded []byte
 
-				if genEncodingMode == "yaml" {
-					outputPath = canonicalDir + name + ".deployable.yml"
+				if genEncodingMode == YAML {
+					outputPath = canonicalDir + name + ".deployable."+YAML
 					yaml := "---\n" +
 						"name: " + name + "\n" +
 						"version: " + tag + "\n" +
@@ -125,8 +128,8 @@ func main() {
 						"  kind: docker\n" +
 						"  image: " + ctr
 					encoded = []byte(yaml)
-				} else if genEncodingMode == "proto" {
-					outputPath = canonicalDir + name + ".deployable.nldp"
+				} else if genEncodingMode == NLDP {
+					outputPath = canonicalDir + name + ".deployable."+NLDP
 
 					deployable, e := newProtoDeployable(ctr, name, tag)
 					if e != nil {

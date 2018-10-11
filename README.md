@@ -32,6 +32,10 @@ slipway gen your.docker.com/foo/bar:1.2.3
 
 # optionally specify an output directory
 slipway gen -d /path/to/dir your.docker.com/foo/bar:1.2.3
+
+# specify the format the deployable should be in (yaml or Nelson's binary NDLP format):
+slipway gen -f nldp your.docker.com/foo/bar:1.2.3
+slipway gen -f yml your.docker.com/foo/bar:1.2.3
 ```
 
 Cut a release with an optional set of deployables (note, for use with Nelson, you *need* the `.deployable.yml` files):
