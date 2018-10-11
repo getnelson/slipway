@@ -1,13 +1,15 @@
 language: go
 
-go: 1.8
+go: 1.11
 
 branches:
   except:
     - /^*-[0-9]/
 
 install:
-  - make install
+  - make tools
+  - make deps.install
+  - make generate
 
 before_script:
   - "if [ $TRAVIS_PULL_REQUEST = 'false' ]; then git checkout -qf $TRAVIS_BRANCH; fi"

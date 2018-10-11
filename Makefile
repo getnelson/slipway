@@ -25,9 +25,6 @@ GODIRS	 = $(shell go list -f '{{.Dir}}' ./... \
 .PHONY: release
 release: format test package
 
-.PHONY: ci
-ci: format test package
-
 .PHONY: package
 package: test build
 	mkdir -p target && \
