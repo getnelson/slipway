@@ -5,7 +5,7 @@
 
 PROGRAM_NAME=slipway
 
-TRAVIS_BUILD_NUMBER ?= dev
+TRAVIS_BUILD_NUMBER ?= 999999
 CLI_FEATURE_VERSION ?= 1.0
 CLI_VERSION ?= ${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
 # if not set, then we're doing local development
@@ -42,9 +42,15 @@ package: test build
 .PHONY: build
 build: vendor
 	@echo "--> building"
-	GOOS=${TARGET_PLATFORM} GOARCH=${TARGET_ARCH} CGO_ENABLED=0 \
-	go build -o $(BINDIR)/$(BINARY_NAME) -ldflags "-X main.globalBuildVersion=${CLI_VERSION}" \
-	./...
+	GOOS=${TARGET_PLATFORM} \
+	GOARCH=${TARGET_ARCH} \
+	CGO_ENABLED=0 \
+	GOBIN=$(BINDIR) \
+	go build \
+	-v \
+	-ldflags "-X main.globalBuildVersion=${CLI_VERSION}" \
+	-o ${BINDIR}/${BINARY_NAME} \
+	./cmd
 
 .PHONY: watch
 watch:
@@ -101,7 +107,7 @@ vendor:
 #-- tools
 #-------------------
 
-tools: tools.gb tools.glide tools.golint tools.fswatch
+tools: tools.gb tools.glide tools.golint tools.fswatch tools.goimports
 
 tools.gb:
 	@command -v gb >/dev/null ; if [ $$? -ne 0 ]; then \

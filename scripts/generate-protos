@@ -5,7 +5,7 @@ set -o pipefail
 shopt -s nullglob
 
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
-ext_api=${root}/vendor/github.com/getnelson/api
+ext_api=${root}/vendor/github.com/getnelson/api/src/main/protobuf
 
 echo "Expecting protoc version >= 3.5.0:"
 protoc=$(which protoc)
@@ -47,12 +47,12 @@ do
   gogoarg+=",M$mapping"
 done
 
-for path in $(find ${ext_api}/src/main/protobuf -type d)
+for path in $(find ${ext_api} -type d)
 do
   path_protos=(${path}/*.proto)
   if [[ ${#path_protos[@]} > 0 ]]
   then
-    echo "Generating protos ${path} ..."
+    echo "---> Generating protos ${path} ..."
     $protoc ${protocarg} ${path}/*.proto \
       --plugin=protoc-gen-gogofast=${root}/bin/gogofast --gogofast_out=${gogoarg}:. \
       --plugin=protoc-gen-validate=${root}/bin/validate --validate_out="lang=gogo:."

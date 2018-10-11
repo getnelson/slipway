@@ -116,10 +116,34 @@ That's all there is to it.
 
 ## Development
 
-1. `brew install go` - install the Go programming language:
-1. `make devel`
-1. `alias fswatch="$GOPATH/bin/fswatch"
-1. `make watch`
+Be sure that you have [Go installed](https://golang.org/doc/install); this can be achieved on OSX with Homebew:
+
+```
+brew install go
+```
+
+Next, checkout the Slipway repository into your `$GOPATH`, with something like this:
+
+```
+cd $GOPATH && \
+git clone git@github.com:getnelson/slipway.git github.com/getnelson/slipway
+```
+
+Next, install the tools `slipway` needs to build:
+
+```
+make tools
+make deps.install
+```
+
+Generate the protobuf (as a one-time operation) and then build:
+
+```
+make generate && \
+make build && \
+make test
+```
+
+The slipway binary will then be available in `./bin/slipway`
 
 
-This should give continous compilation without the tedious need to constantly restart `gb build`
