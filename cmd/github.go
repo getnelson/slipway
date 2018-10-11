@@ -17,9 +17,10 @@
 package main
 
 import (
-	"github.com/google/go-github/github"
 	"net/url"
 	"strings"
+
+	"github.com/google/go-github/github"
 )
 
 func buildGithubClient(domain string, credentials Credentials) (gh *github.Client) {

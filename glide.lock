@@ -1,8 +1,8 @@
-hash: ee9e3e92d0e71bc4d034c2c6638eeeed8295d653d3245479d0329c3edbb54061
-updated: 2018-10-10T14:50:29.525429-07:00
+hash: c7e9df8b1a3f09ad773db912e8d22828d46029cbc7b87bcf069e869b5a9072b0
+updated: 2018-10-11T12:30:11.844575-07:00
 imports:
 - name: github.com/getnelson/api
-  version: 4e44173edb5a599b7adaf8c8e83d5ccbda8e922d
+  version: 125b6175b6d13e5296ead4ba9bd74f0ebfd18d33
   subpackages:
   - protobuf
 - name: github.com/gogo/googleapis
@@ -10,7 +10,10 @@ imports:
 - name: github.com/gogo/protobuf
   version: 636bf0302bc95575d69441b25a2603156ffdddf1
   subpackages:
+  - proto
   - protoc-gen-gogofast
+  - sortkeys
+  - types
 - name: github.com/google/go-github
   version: d4f1b2d029be1730fd349ca929cc9c0da4a27007
   subpackages:

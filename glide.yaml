@@ -1,4 +1,6 @@
 package: github.com/getnelson/slipway
+ignore:
+- github.com/getnelson/slipway/nelson
 import:
 - package: github.com/gogo/protobuf
   version: ^1.1.1
@@ -17,7 +19,7 @@ import:
 - package: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 - package: github.com/getnelson/api
-  version: master
+  version: 125b6175b6d13e5296ead4ba9bd74f0ebfd18d33
   subpackages:
   - protobuf
 - package: github.com/gogo/googleapis

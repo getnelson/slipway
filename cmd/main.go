@@ -20,13 +20,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-github/github"
-	"gopkg.in/urfave/cli.v1"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gogo/protobuf/proto"
+	"github.com/google/go-github/github"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var globalBuildVersion string
@@ -49,12 +51,15 @@ func main() {
 	app.EnableBashCompletion = true
 
 	// switches for the cli
-	var userDirectory string
-	var userGithubHost string
-	var userGithubTag string
-	var userGithubRepoSlug string
-	var credentialsLocation string
-	var targetBranch string
+	var (
+		userDirectory       string
+		userGithubHost      string
+		userGithubTag       string
+		userGithubRepoSlug  string
+		credentialsLocation string
+		targetBranch        string
+		genEncodingMode     string
+	)
 
 	app.Commands = []cli.Command{
 		////////////////////////////// DEPLOYABLE //////////////////////////////////
@@ -68,11 +73,21 @@ func main() {
 					Usage:       "location to output the YAML file",
 					Destination: &userDirectory,
 				},
+				cli.StringFlag{
+					Name:        "format, f",
+					Value:       "yaml",
+					Usage:       "Encoding format to use; present options are 'yaml' or 'proto'",
+					Destination: &genEncodingMode,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				ctr := strings.TrimSpace(c.Args().First())
 				if len(ctr) <= 0 {
 					return cli.NewExitError("You must specify the name of a docker container in order to generate Nelson deployable yml.", 1)
+				}
+
+				if genEncodingMode != "yaml" && genEncodingMode != "proto" {
+					return cli.NewExitError("When specifying an encoding, only 'proto' or 'yaml' are allowed. The '"+genEncodingMode+"' type is not supported.", 1)
 				}
 
 				if len(userDirectory) <= 0 {
@@ -98,17 +113,35 @@ func main() {
 
 				name, tag := getUnitNameFromDockerContainer(ctr)
 
-				yaml := "---\n" +
-					"name: " + name + "\n" +
-					"version: " + tag + "\n" +
-					"output:\n" +
-					"  kind: docker\n" +
-					"  image: " + ctr
+				var outputPath string
+				var encoded []byte
 
-				outputPath := canonicalDir + name + ".deployable.yml"
+				if genEncodingMode == "yaml" {
+					outputPath = canonicalDir + name + ".deployable.yml"
+					yaml := "---\n" +
+						"name: " + name + "\n" +
+						"version: " + tag + "\n" +
+						"output:\n" +
+						"  kind: docker\n" +
+						"  image: " + ctr
+					encoded = []byte(yaml)
+				} else if genEncodingMode == "proto" {
+					outputPath = canonicalDir + name + ".deployable.nldp"
+
+					deployable, e := newProtoDeployable(ctr, name, tag)
+					if e != nil {
+						return cli.NewMultiError(e...)
+					}
+					data, ex := proto.Marshal(deployable)
+					if ex != nil {
+						return cli.NewExitError("Unable to encode deplyoable in binary format.", 1)
+					}
+
+					encoded = data
+				}
 
 				fmt.Println("Writing to " + outputPath + "...")
-				ioutil.WriteFile(outputPath, []byte(yaml), 0644)
+				ioutil.WriteFile(outputPath, encoded, 0644)
 
 				return nil
 			},

@@ -17,12 +17,16 @@
 package main
 
 import (
-	"gopkg.in/magiconair/properties.v1"
+	"errors"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	"gopkg.in/magiconair/properties.v1"
+
+	nelson "github.com/getnelson/slipway/nelson"
 )
 
 type Credentials struct {
@@ -98,4 +102,31 @@ func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
 	}
 
 	return sanitzed, tag
+}
+
+func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
+	arr := strings.Split(tagged, ".")
+	if len(arr) > 3 {
+		errs = append(errs, errors.New("The supplied version string '"+tagged+"' should follow semver, and be composed of three components. E.g. 1.20.49"))
+		return &nelson.Version{}, errs
+	}
+
+	return &nelson.Version{Series: 1, Feature: 2, Patch: 4}, nil
+}
+
+func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.Deployable, []error) {
+	v, errs := versionFromTag(tag)
+	if errs != nil {
+		return &nelson.Deployable{}, errs
+	}
+
+	return &nelson.Deployable{
+		UnitName: unitName,
+		Version:  v,
+		Kind: &nelson.Deployable_Docker{
+			&nelson.Docker{
+				Image: imageUri,
+			},
+		},
+	}, nil
 }
