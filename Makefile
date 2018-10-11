@@ -104,13 +104,7 @@ vendor:
 #-- tools
 #-------------------
 
-tools: tools.gb tools.glide tools.golint tools.fswatch tools.goimports
-
-tools.gb:
-	@command -v gb >/dev/null ; if [ $$? -ne 0 ]; then \
-		echo "--> installing gb"; \
-		go get -u go get github.com/constabulary/gb/...; \
-	fi
+tools: tools.glide tools.golint tools.fswatch tools.goimports
 
 tools.fswatch:
 	@command -v fswatch >/dev/null ; if [ $$? -ne 0 ]; then \
