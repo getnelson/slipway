@@ -137,10 +137,10 @@ tools.protoc:
 		if [ `uname -s` = "Linux" ]; then \
 			curl -sSOL "https://github.com/google/protobuf/releases/download/v$(PROTOC_VERSION)/protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
 			unzip "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" -d protoc3 && \
-			mv protoc3/bin/* ${PROTOC_TARGET_DIR}/bin && \
-			chmod -R 775 ${PROTOC_TARGET_DIR}/bin && \
-			mv protoc3/include/* ${PROTOC_TARGET_DIR}/include && \
-			chmod -R 755 ${PROTOC_TARGET_DIR}/include && \
+			sudo mv protoc3/bin/* ${PROTOC_TARGET_DIR}/bin && \
+			sudo chmod -R 775 ${PROTOC_TARGET_DIR}/bin && \
+			sudo mv protoc3/include/* ${PROTOC_TARGET_DIR}/include && \
+			sudo chmod -R 755 ${PROTOC_TARGET_DIR}/include && \
 			rm "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
 			rm -rf protoc3; \
 		fi; \

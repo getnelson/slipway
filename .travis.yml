@@ -6,6 +6,8 @@ branches:
   except:
     - /^*-[0-9]/
 
+sudo: required
+
 install:
   - make tools
   - make deps.install
