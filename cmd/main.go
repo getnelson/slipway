@@ -18,7 +18,6 @@ package main
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,6 +28,8 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/google/go-github/github"
 	"gopkg.in/urfave/cli.v1"
+
+	nelson "github.com/getnelson/slipway/nelson"
 )
 
 var globalBuildVersion string
@@ -79,7 +80,7 @@ func main() {
 				cli.StringFlag{
 					Name:        "format, f",
 					Value:       "yaml",
-					Usage:       "Encoding format to use; present options are '"+YAML+"' or '"+NLDP+"'",
+					Usage:       "Encoding format to use; present options are '" + YAML + "' or '" + NLDP + "'",
 					Destination: &genEncodingMode,
 				},
 			},
@@ -120,7 +121,7 @@ func main() {
 				var encoded []byte
 
 				if genEncodingMode == YAML {
-					outputPath = canonicalDir + name + ".deployable."+YAML
+					outputPath = canonicalDir + name + ".deployable." + YAML
 					yaml := "---\n" +
 						"name: " + name + "\n" +
 						"version: " + tag + "\n" +
@@ -129,7 +130,7 @@ func main() {
 						"  image: " + ctr
 					encoded = []byte(yaml)
 				} else if genEncodingMode == NLDP {
-					outputPath = canonicalDir + name + ".deployable."+NLDP
+					outputPath = canonicalDir + name + ".deployable." + NLDP
 
 					deployable, e := newProtoDeployable(ctr, name, tag)
 					if e != nil {
@@ -208,7 +209,7 @@ func main() {
 				owner := splitarr[0]
 				reponame := splitarr[1]
 
-				deployablePaths, direrr := findDeployableFilesInDir(userDirectory)
+				deployablePaths, direrr := findDeployableFilesInDir(userDirectory, YAML)
 
 				if len(userDirectory) != 0 {
 					// if you specified a dir, but it was not readable or it didnt exist
@@ -334,7 +335,7 @@ func main() {
 				owner := splitarr[0]
 				reponame := splitarr[1]
 
-				deployablePaths, direrr := findDeployableFilesInDir(userDirectory)
+				deployablePaths, direrr := findDeployableFilesInDir(userDirectory, NLDP)
 
 				if len(userDirectory) != 0 {
 					// if you specified a dir, but it was not readable or it didnt exist
@@ -359,19 +360,36 @@ func main() {
 				// before packing them into a JSON array (as required by the Github
 				// deployment api), with the intention that Nelson gets this payload
 				// and can decode the deployables as-is, using its existing decoders.
-				encodedDeployables := []string{}
+				encodedDeployables := []*nelson.Deployable{}
 				for _, path := range deployablePaths {
 					cnts, err := ioutil.ReadFile(path)
 					if err != nil {
 						return cli.NewExitError("Could not read deployable at "+path, 1)
 					}
-					encoded := base64.StdEncoding.EncodeToString(cnts)
-					encodedDeployables = append(encodedDeployables, encoded)
+					o := &nelson.Deployable{}
+					if err := proto.Unmarshal(cnts, o); err != nil {
+						return cli.NewExitError("Could not unmarshal deployable at '"+path+"'", 1)
+					}
+					encodedDeployables = append(encodedDeployables, o)
 				}
 
+				// package the deployables into our superstructure
+				// analog of a Seq[Deployable] in protobuf
+				all := &nelson.Deployables{Deployables: encodedDeployables}
+
+				data, ex := proto.Marshal(all)
+				if ex != nil {
+					return cli.NewExitError("Unable to encode deplyoable in binary format.", 1)
+				}
+
+				// take our protobuf byte array and encode it into base64
+				// so that we can pretend its a JSON string
+				encoded := base64.StdEncoding.EncodeToString(data)
+
 				task := "deploy"
-				bytes, _ := json.Marshal(encodedDeployables)
-				payload := string(bytes)
+
+				// yes my pretty, a JSON string you will be
+				payload := string(encoded)
 
 				r := github.DeploymentRequest{
 					Ref:     &userGithubTag,

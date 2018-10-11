@@ -51,7 +51,7 @@ func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func findDeployableFilesInDir(path string) ([]string, error) {
+func findDeployableFilesInDir(path string, extension string) ([]string, error) {
 	if _, e := os.Stat(path); e == nil {
 		files, err := ioutil.ReadDir(path)
 		if err != nil {
@@ -62,7 +62,7 @@ func findDeployableFilesInDir(path string) ([]string, error) {
 
 		for _, file := range files {
 			filename := file.Name()
-			if (strings.HasSuffix(filename, ".deployable.yml") || strings.HasSuffix(filename, ".deployable.yaml")) && file.IsDir() == false {
+			if (strings.HasSuffix(filename, ".deployable."+extension) || strings.HasSuffix(filename, ".deployable.yaml")) && file.IsDir() == false {
 				desired = append(desired, path+"/"+filename)
 			}
 		}
@@ -104,6 +104,10 @@ func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
 	return sanitzed, tag
 }
 
+/**
+ * Given a docker tag like 1.23.45 create a typed protobuf nelson.Version
+ * representation which can be used with v2 APIs
+ */
 func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
 	arr := strings.Split(tagged, ".")
 	if len(arr) > 3 {
@@ -114,6 +118,7 @@ func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
 	return &nelson.Version{Series: 1, Feature: 2, Patch: 4}, nil
 }
 
+/* lift the old three-param behavior into the new v2 typed nelson.Deployable */
 func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.Deployable, []error) {
 	v, errs := versionFromTag(tag)
 	if errs != nil {
