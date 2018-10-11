@@ -4,7 +4,8 @@
 #-------------------
 
 PROGRAM_NAME=slipway
-
+PROTOC_TARGET_DIR=/usr/local
+PROTOC_VERSION=3.5.1
 TRAVIS_BUILD_NUMBER ?= 999999
 CLI_FEATURE_VERSION ?= 1.0
 CLI_VERSION ?= ${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
@@ -104,7 +105,7 @@ vendor:
 #-- tools
 #-------------------
 
-tools: tools.glide tools.golint tools.fswatch tools.goimports
+tools: tools.protoc tools.glide tools.golint tools.fswatch tools.goimports
 
 tools.fswatch:
 	@command -v fswatch >/dev/null ; if [ $$? -ne 0 ]; then \
@@ -128,6 +129,21 @@ tools.goimports:
 	@command -v goimports >/dev/null ; if [ $$? -ne 0 ]; then \
 		echo "--> installing goimports"; \
 		go get golang.org/x/tools/cmd/goimports; \
+	fi
+
+tools.protoc:
+	@command -v protoc >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing protoc"; \
+		if [ `uname -s` = "Linux" ]; then \
+			curl -sSOL "https://github.com/google/protobuf/releases/download/v$(PROTOC_VERSION)/protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
+			unzip "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" -d protoc3 && \
+			mv protoc3/bin/* ${PROTOC_TARGET_DIR}/bin && \
+			chmod -R 775 ${PROTOC_TARGET_DIR}/bin && \
+			mv protoc3/include/* ${PROTOC_TARGET_DIR}/include && \
+			chmod -R 755 ${PROTOC_TARGET_DIR}/include && \
+			rm "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
+			rm -rf protoc3; \
+		fi; \
 	fi
 
 $(BINDIR)/gogofast: vendor
