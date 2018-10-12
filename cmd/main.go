@@ -18,6 +18,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -63,6 +64,7 @@ func main() {
 		credentialsLocation string
 		targetBranch        string
 		genEncodingMode     string
+		isDryRun            bool
 	)
 
 	app.Commands = []cli.Command{
@@ -192,6 +194,11 @@ func main() {
 					Usage:       "Branch to base release off from",
 					Destination: &targetBranch,
 				},
+				cli.BoolFlag{
+					Name:        "dry",
+					Usage:       "Is this a dry run or not",
+					Destination: &isDryRun,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				if len(userGithubTag) <= 0 {
@@ -240,45 +247,50 @@ func main() {
 					Draft:           &isDraft,
 				}
 
-				// create the release
-				release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
-
-				if e != nil {
-					fmt.Println(e)
-					return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint. Does Travis have permissions to your repository?", 1)
+				if isDryRun {
+					fmt.Println("The following release payload would be sent to Github:")
+					j, _ := json.Marshal(r)
+					fmt.Println(string(j))
 				} else {
-					fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
+					// create the release
+					release, _, e := gh.Repositories.CreateRelease(owner, reponame, &r)
+
+					if e != nil {
+						fmt.Println(e)
+						return cli.NewExitError("Encountered an unexpected error whilst calling the specified Github endpint. Does Travis have permissions to your repository?", 1)
+					} else {
+						fmt.Println("Created release " + strconv.Itoa(*release.ID) + " on " + owner + "/" + reponame)
+					}
+
+					// upload the release assets
+					for _, path := range deployablePaths {
+						slices := strings.Split(path, "/")
+						name := slices[len(slices)-1]
+						file, _ := os.Open(path)
+
+						fmt.Println("Uploading " + name + " as a release asset...")
+
+						opt := &github.UploadOptions{Name: name}
+						gh.Repositories.UploadReleaseAsset(owner, reponame, *release.ID, opt, file)
+					}
+
+					fmt.Println("Promoting release from a draft to offical release...")
+
+					// mutability ftw?
+					isDraft = false
+					r2 := github.RepositoryRelease{
+						Draft: &isDraft,
+					}
+
+					_, _, xxx := gh.Repositories.EditRelease(owner, reponame, *release.ID, &r2)
+
+					if xxx != nil {
+						fmt.Println(xxx)
+						fmt.Println("Error encountered, cleaning up release...")
+						gh.Repositories.DeleteRelease(owner, reponame, *release.ID)
+						return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
+					}
 				}
-
-				// upload the release assets
-				for _, path := range deployablePaths {
-					slices := strings.Split(path, "/")
-					name := slices[len(slices)-1]
-					file, _ := os.Open(path)
-
-					fmt.Println("Uploading " + name + " as a release asset...")
-
-					opt := &github.UploadOptions{Name: name}
-					gh.Repositories.UploadReleaseAsset(owner, reponame, *release.ID, opt, file)
-				}
-
-				fmt.Println("Promoting release from a draft to offical release...")
-
-				// mutability ftw?
-				isDraft = false
-				r2 := github.RepositoryRelease{
-					Draft: &isDraft,
-				}
-
-				_, _, xxx := gh.Repositories.EditRelease(owner, reponame, *release.ID, &r2)
-
-				if xxx != nil {
-					fmt.Println(xxx)
-					fmt.Println("Error encountered, cleaning up release...")
-					gh.Repositories.DeleteRelease(owner, reponame, *release.ID)
-					return cli.NewExitError("Unable to promote this release to an offical release. Please ensure that the no other release references the same tag.", 1)
-				}
-
 				return nil
 			},
 		},
@@ -317,6 +329,11 @@ func main() {
 					Name:        "creds, c",
 					Usage:       "GitHub credentials file",
 					Destination: &credentialsLocation,
+				},
+				cli.BoolFlag{
+					Name:        "dry",
+					Usage:       "Is this a dry run or not",
+					Destination: &isDryRun,
 				},
 			},
 			Action: func(c *cli.Context) error {
@@ -396,14 +413,17 @@ func main() {
 					Payload: &payload,
 				}
 
-				deployment, _, errors := gh.Repositories.CreateDeployment(owner, reponame, &r)
-
-				if errors != nil {
-					return cli.NewMultiError(errors)
+				if isDryRun {
+					fmt.Println("The following payload would be sent to Github:")
+					j, _ := json.Marshal(r)
+					fmt.Println(string(j))
+				} else {
+					deployment, _, errors := gh.Repositories.CreateDeployment(owner, reponame, &r)
+					if errors != nil {
+						return cli.NewMultiError(errors)
+					}
+					fmt.Println("Created deployment " + strconv.Itoa(*deployment.ID) + " on " + owner + "/" + reponame)
 				}
-
-				fmt.Println("Created deployment " + strconv.Itoa(*deployment.ID) + " on " + owner + "/" + reponame)
-
 				return nil
 			},
 		},
