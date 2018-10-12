@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -115,7 +116,11 @@ func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
 		return &nelson.Version{}, errs
 	}
 
-	return &nelson.Version{Series: 1, Feature: 2, Patch: 4}, nil
+	se, _ := strconv.ParseInt(arr[0], 10, 32)
+	fe, _ := strconv.ParseInt(arr[1], 10, 32)
+	pa, _ := strconv.ParseInt(arr[2], 10, 32)
+
+	return &nelson.Version{Series: se, Feature: fe, Patch: pa}, nil
 }
 
 /* lift the old three-param behavior into the new v2 typed nelson.Deployable */

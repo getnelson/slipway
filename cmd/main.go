@@ -387,7 +387,6 @@ func main() {
 				encoded := base64.StdEncoding.EncodeToString(data)
 
 				task := "deploy"
-
 				// yes my pretty, a JSON string you will be
 				payload := string(encoded)
 
