@@ -1,0 +1,33 @@
+hash: d17f34b131115520fa50873a67e1aa387a0eec2f9a41544d2e788ce12cfd8af9
+updated: 2018-10-11T15:20:32.685732-07:00
+imports:
+- name: github.com/getnelson/api
+  version: 113cd719a23042e44549bc4c479c25385bc5404d
+  subpackages:
+  - protobuf
+- name: github.com/gogo/googleapis
+  version: 8558fb44d2f1fc223118afc694129d2c2d2924d1
+- name: github.com/gogo/protobuf
+  version: 636bf0302bc95575d69441b25a2603156ffdddf1
+  subpackages:
+  - proto
+  - protoc-gen-gogofast
+  - sortkeys
+  - types
+- name: github.com/google/go-github
+  version: d4f1b2d029be1730fd349ca929cc9c0da4a27007
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
+  subpackages:
+  - query
+- name: github.com/lyft/protoc-gen-validate
+  version: f9d2b11e44149635b23a002693b76512b01ae515
+- name: gopkg.in/magiconair/properties.v1
+  version: c265cfa48dda6474e208715ca93e987829f572f8
+- name: gopkg.in/urfave/cli.v1
+  version: a14d7d367bc02b1f57d88de97926727f2d936387
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+testImports: []

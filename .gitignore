@@ -28,3 +28,6 @@ pkg/*
 
 target
 *.deployable.yml
+*.deployable.nldp
+vendor/
+nelson/

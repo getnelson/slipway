@@ -1,35 +1,35 @@
 
-PROGRAM_NAME=slipway
+#-------------------
+# Variables
+#-------------------
 
-TRAVIS_BUILD_NUMBER ?= dev
+PROGRAM_NAME=slipway
+PROTOC_TARGET_DIR=/usr/local
+PROTOC_VERSION=3.5.1
+TRAVIS_BUILD_NUMBER ?= 999999
 CLI_FEATURE_VERSION ?= 1.0
 CLI_VERSION ?= ${CLI_FEATURE_VERSION}.${TRAVIS_BUILD_NUMBER}
 # if not set, then we're doing local development
 # as this will be set by the travis matrix for realz
 TARGET_PLATFORM ?= darwin
 TARGET_ARCH ?= amd64
-TAR_NAME = ${PROGRAM_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${CLI_VERSION}.tar.gz
+BINARY_NAME := ${PROGRAM_NAME}-${TARGET_PLATFORM}-${TARGET_ARCH}-${CLI_VERSION}
+TAR_NAME = ${BINARY_NAME}.tar.gz
 
-install:
-	go get github.com/constabulary/gb/...
+SHELL 	:= /bin/bash
+BINDIR	:= bin
+PKG 		:= github.com/getnelson/${PROGRAM_NAME}
+GOFILES	 = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GODIRS	 = $(shell go list -f '{{.Dir}}' ./... \
+						| grep -vFf <(go list -f '{{.Dir}}' ./vendor/...))
 
-install-dev: install
-	go get github.com/codeskyblue/fswatch
-
+.PHONY: release
 release: format test package
 
-compile: format
-	GOOS=${TARGET_PLATFORM} GOARCH=amd64 CGO_ENABLED=0 gb build -ldflags "-X main.globalBuildVersion=${CLI_VERSION}"
-
-watch:
-	fswatch
-
-test: compile
-	gb test -v
-
-package: test
+.PHONY: package
+package: test build
 	mkdir -p target && \
-	mv bin/${PROGRAM_NAME}-${TARGET_PLATFORM}-amd64 ./${PROGRAM_NAME} && \
+	mv bin/${BINARY_NAME} ./${PROGRAM_NAME} && \
 	tar -zcvf ${TAR_NAME} ${PROGRAM_NAME} && \
 	rm ${PROGRAM_NAME} && \
 	sha1sum ${TAR_NAME} > ${TAR_NAME}.sha1 && \
@@ -37,12 +37,119 @@ package: test
 	mv ${TAR_NAME} target/${TAR_NAME} && \
 	mv ${TAR_NAME}.sha1 target/${TAR_NAME}.sha1
 
-format:
-	go fmt src/github.com/getnelson/${PROGRAM_NAME}/*.go
+.PHONY: build
+build: vendor
+	@echo "--> building"
+	GOOS=${TARGET_PLATFORM} \
+	GOARCH=${TARGET_ARCH} \
+	CGO_ENABLED=0 \
+	GOBIN=$(BINDIR) \
+	go build \
+	-v \
+	-ldflags "-X main.globalBuildVersion=${CLI_VERSION}" \
+	-o ${BINDIR}/${BINARY_NAME} \
+	./cmd
 
+.PHONY: watch
+watch:
+	@echo "--> watching for changed files"
+	@fswatch
+
+.PHONY: clean
 clean:
-	rm -rf bin && \
-	rm -rf pkg
+	@echo "--> cleaning compiled objects and binaries"
+	@rm -rf $(BINDIR)/*
 
-tar:
-	echo ${TAR_NAME}
+.PHONY: test
+test: vendor
+	@echo "--> running unit tests"
+	@go test ./cmd/...
+
+.PHONY: format
+format: tools.goimports
+	@echo "--> formatting code with 'goimports' tool"
+	@goimports -local $(PKG) -w -l $(GOFILES)
+
+.PHONY: lint
+lint: tools.golint
+	@echo "--> checking code style with 'golint' tool"
+	@echo $(GODIRS) | xargs -n 1 golint
+
+#-------------------
+#-- code generaion
+#-------------------
+
+generate: $(BINDIR)/gogofast $(BINDIR)/validate
+	@echo "--> generating pb.go files"
+	$(SHELL) scripts/generate-protos
+
+#------------------
+#-- dependencies
+#------------------
+
+.PHONY: deps.update deps.install
+
+deps.update: tools.glide
+	@echo "--> updating dependencies from glide.yaml"
+	@glide update
+
+deps.install: tools.glide
+	@echo "--> installing dependencies from glide.lock "
+	@glide install
+
+vendor:
+	@echo "--> installing dependencies from glide.lock "
+	@glide install
+
+#-------------------
+#-- tools
+#-------------------
+
+tools: tools.protoc tools.glide tools.golint tools.fswatch tools.goimports
+
+tools.fswatch:
+	@command -v fswatch >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing fswatch"; \
+		go get -u github.com/codeskyblue/fswatch; \
+	fi
+
+tools.golint:
+	@command -v golint >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing golint"; \
+		go get -u golang.org/x/lint/golint; \
+	fi
+
+tools.glide:
+	@command -v glide >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing glide"; \
+		curl https://glide.sh/get | sh; \
+	fi
+
+tools.goimports:
+	@command -v goimports >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing goimports"; \
+		go get golang.org/x/tools/cmd/goimports; \
+	fi
+
+tools.protoc:
+	@command -v protoc >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing protoc"; \
+		if [ `uname -s` = "Linux" ]; then \
+			curl -sSOL "https://github.com/google/protobuf/releases/download/v$(PROTOC_VERSION)/protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
+			unzip "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" -d protoc3 && \
+			sudo mv protoc3/bin/* ${PROTOC_TARGET_DIR}/bin && \
+			sudo chmod -R 775 ${PROTOC_TARGET_DIR}/bin && \
+			sudo mv protoc3/include/* ${PROTOC_TARGET_DIR}/include && \
+			sudo chmod -R 755 ${PROTOC_TARGET_DIR}/include && \
+			rm "protoc-$(PROTOC_VERSION)-linux-x86_64.zip" && \
+			rm -rf protoc3; \
+		fi; \
+	fi
+
+$(BINDIR)/gogofast: vendor
+	@echo "--> building $@"
+	@go build -o $@ vendor/github.com/gogo/protobuf/protoc-gen-gogofast/main.go
+
+$(BINDIR)/validate: vendor
+	@echo "--> building $@"
+	@go build -o $@ vendor/github.com/lyft/protoc-gen-validate/main.go
