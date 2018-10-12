@@ -64,7 +64,7 @@ func main() {
 		credentialsLocation string
 		targetBranch        string
 		genEncodingMode     string
-		isDryRun						bool
+		isDryRun            bool
 	)
 
 	app.Commands = []cli.Command{
@@ -249,7 +249,7 @@ func main() {
 
 				if isDryRun {
 					fmt.Println("The following release payload would be sent to Github:")
-					j,_ := json.Marshal(r)
+					j, _ := json.Marshal(r)
 					fmt.Println(string(j))
 				} else {
 					// create the release
@@ -415,7 +415,7 @@ func main() {
 
 				if isDryRun {
 					fmt.Println("The following payload would be sent to Github:")
-					j,_ := json.Marshal(r)
+					j, _ := json.Marshal(r)
 					fmt.Println(string(j))
 				} else {
 					deployment, _, errors := gh.Repositories.CreateDeployment(owner, reponame, &r)

@@ -133,8 +133,8 @@ func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.D
 	return &nelson.Deployable{
 		UnitName: unitName,
 		Version:  v,
-		Kind: &nelson.Deployable_Container {
-			&nelson.Container {
+		Kind: &nelson.Deployable_Container{
+			&nelson.Container{
 				Image: imageUri,
 			},
 		},
