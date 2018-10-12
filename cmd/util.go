@@ -120,7 +120,7 @@ func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
 	fe, _ := strconv.ParseInt(arr[1], 10, 32)
 	pa, _ := strconv.ParseInt(arr[2], 10, 32)
 
-	return &nelson.Version{Series: se, Feature: fe, Patch: pa}, nil
+	return &nelson.Version{Series: int32(se), Feature: int32(fe), Patch: int32(pa)}, nil
 }
 
 /* lift the old three-param behavior into the new v2 typed nelson.Deployable */
@@ -133,8 +133,8 @@ func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.D
 	return &nelson.Deployable{
 		UnitName: unitName,
 		Version:  v,
-		Kind: &nelson.Deployable_Docker{
-			&nelson.Docker{
+		Kind: &nelson.Deployable_Container {
+			&nelson.Container {
 				Image: imageUri,
 			},
 		},
