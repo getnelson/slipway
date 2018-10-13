@@ -81,7 +81,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:        "format, f",
-					Value:       "yaml",
+					Value:       YAML,
 					Usage:       "Encoding format to use; present options are '" + YAML + "' or '" + NLDP + "'",
 					Destination: &genEncodingMode,
 				},
