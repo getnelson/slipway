@@ -133,9 +133,9 @@ func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.D
 
 	return &nelson.Deployable{
 		UnitName: unitName,
-		Version:  &nelson.Deployable_Semver{v},
+		Version: &nelson.Deployable_Semver { v },
 		Kind: &nelson.Deployable_Container{
-			&nelson.Container{
+			&nelson.Container {
 				Image: imageUri,
 			},
 		},
