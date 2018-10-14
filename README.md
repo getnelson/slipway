@@ -33,12 +33,29 @@ slipway gen your.docker.com/foo/bar:1.2.3
 # optionally specify an output directory
 slipway gen -d /path/to/dir your.docker.com/foo/bar:1.2.3
 
-# specify the format the deployable should be in (yaml or Nelson's binary NDLP format):
+# specify the format the deployable should be in (yaml or Nelson's binary NDLP format).
+# NLDP is the required deployable format from Nelson 0.12 or later...
 slipway gen -f nldp your.docker.com/foo/bar:1.2.3
 slipway gen -f yml your.docker.com/foo/bar:1.2.3
 ```
 
-Cut a release with an optional set of deployables (note, for use with Nelson, you *need* the `.deployable.yml` files):
+Create a [Github deployment](https://developer.github.com/v3/repos/deployments/), encoding any `*.deployable.nldp` files into the `payload` field (as directed by Github API). Slipway can only create Github Deployments that utilize Nelson's binary NLDP format, which is the required deployable format from Nelson version 0.12 or later.
+
+```
+# specify the branch to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
+slipway deploy --ref master
+
+# specify the tag to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
+slipway deploy -t 2.0.0
+
+# specify the repo and an exact SHA to use for the deployment:
+slipway deploy --ref fdb7da2ab3b2cd172e86c1af9adefa3523f6d65b  -r getnelson/howdy
+
+# specify the github domain, tag, repo slug and input directory
+slipway deploy -x github.yourcompany.com -t 2.0.0 -r getnelson/howdy -d `pwd`/target
+```
+
+Cut a release with an optional set of deployables (note, for use with Nelson, you *need* the `.deployable.yml` files). Please note that Slipway creating Github Releases is still available to support users of Nelson version 0.11.x or earlier. For new users, please see `slipway deploy`.
 
 ```
 # release a tag for a repository hosted on github.com
@@ -60,22 +77,6 @@ slipway release -x github.yourcompany.com -t 2.0.0 -c /path/to/credentials
 # specify the github domain, tag, repo slug and input directory
 slipway release -x github.yourcompany.com -t 2.0.0 -r getnelson/howdy -d `pwd`/target
 
-```
-
-Create a [Github deployment](https://developer.github.com/v3/repos/deployments/), encoding any `*.deployable.yml` files into the `payload` field (as directed by Github API):
-
-```
-# specify the branch to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
-slipway deploy --ref master
-
-# specify the tag to use for the deployment (repo is infered from `TRAVIS_REPO_SLUG`):
-slipway deploy -t 2.0.0
-
-# specify the repo and an exact SHA to use for the deployment:
-slipway deploy --ref fdb7da2ab3b2cd172e86c1af9adefa3523f6d65b  -r getnelson/howdy
-
-# specify the github domain, tag, repo slug and input directory
-slipway deploy -x github.yourcompany.com -t 2.0.0 -r getnelson/howdy -d `pwd`/target
 ```
 
 ### Authentication
