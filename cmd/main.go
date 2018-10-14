@@ -136,7 +136,8 @@ func main() {
 
 					deployable, e := newProtoDeployable(ctr, name, tag)
 					if e != nil {
-						return cli.NewMultiError(e...)
+						printTerminalErrors(e)
+						return cli.NewExitError("Fatal error whilst generating NLDP format.", 1)
 					}
 					data, ex := proto.Marshal(deployable)
 					if ex != nil {
@@ -420,7 +421,8 @@ func main() {
 				} else {
 					deployment, _, errors := gh.Repositories.CreateDeployment(owner, reponame, &r)
 					if errors != nil {
-						return cli.NewMultiError(errors)
+						printTerminalErrors([]error{errors})
+						return cli.NewExitError("Fatal error encountered whilst creating deployment.", 1)
 					}
 					fmt.Println("Created deployment " + strconv.Itoa(*deployment.ID) + " on " + owner + "/" + reponame)
 				}

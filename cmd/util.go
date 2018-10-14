@@ -18,6 +18,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -139,4 +140,14 @@ func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.D
 			},
 		},
 	}, nil
+}
+
+func printTerminalErrors(errs []error) {
+	for i, j := 0, len(errs)-1; i < j; i, j = i+1, j-1 {
+		errs[i], errs[j] = errs[j], errs[i]
+	}
+
+	for _, e := range errs {
+		fmt.Println(e)
+	}
 }
