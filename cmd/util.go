@@ -110,18 +110,18 @@ func getUnitNameFromDockerContainer(ctr string) (a string, b string) {
  * Given a docker tag like 1.23.45 create a typed protobuf nelson.Version
  * representation which can be used with v2 APIs
  */
-func versionFromTag(tagged string) (v *nelson.Version, errs []error) {
+func versionFromTag(tagged string) (v *nelson.SemanticVersion, errs []error) {
 	arr := strings.Split(tagged, ".")
 	if len(arr) > 3 {
 		errs = append(errs, errors.New("The supplied version string '"+tagged+"' should follow semver, and be composed of three components. E.g. 1.20.49"))
-		return &nelson.Version{}, errs
+		return &nelson.SemanticVersion{}, errs
 	}
 
 	se, _ := strconv.ParseInt(arr[0], 10, 32)
 	fe, _ := strconv.ParseInt(arr[1], 10, 32)
 	pa, _ := strconv.ParseInt(arr[2], 10, 32)
 
-	return &nelson.Version{Series: int32(se), Feature: int32(fe), Patch: int32(pa)}, nil
+	return &nelson.SemanticVersion{Major: int32(se), Minor: int32(fe), Patch: int32(pa)}, nil
 }
 
 /* lift the old three-param behavior into the new v2 typed nelson.Deployable */
@@ -133,9 +133,9 @@ func newProtoDeployable(imageUri string, unitName string, tag string) (*nelson.D
 
 	return &nelson.Deployable{
 		UnitName: unitName,
-		Version:  v,
+		Version: &nelson.Deployable_Semver { v },
 		Kind: &nelson.Deployable_Container{
-			&nelson.Container{
+			&nelson.Container {
 				Image: imageUri,
 			},
 		},
