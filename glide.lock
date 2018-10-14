@@ -1,8 +1,8 @@
-hash: 474cdc8da135becdeda210e91c91743d1f87b07a545863650b4575dd5de59812
-updated: 2018-10-12T08:18:09.351772-07:00
+hash: f63f0b2223a76d1c235183a317590981e143f0e0c4bd3a45e6cd66c89cb1912c
+updated: 2018-10-14T16:14:46.451072-07:00
 imports:
 - name: github.com/getnelson/api
-  version: 5bdf591afeae6880f49b2026e1975af5a2050ecb
+  version: b34ae15e3411689955977de715a10d5bd2901de5
   subpackages:
   - protobuf
 - name: github.com/gogo/googleapis

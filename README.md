@@ -134,21 +134,19 @@ cd $GOPATH && \
 git clone git@github.com:getnelson/slipway.git github.com/getnelson/slipway
 ```
 
-Next, install the tools `slipway` needs to build:
+Next, install the tools `slipway` needs to build and generate the protobuf (as a one-time operation)
 
 ```
 make tools
 make deps.install
+make generate
 ```
 
-Generate the protobuf (as a one-time operation) and then build:
+Finally, execute the build and test:
 
 ```
-make generate && \
 make build && \
 make test
 ```
 
 The slipway binary will then be available in `./bin/slipway`
-
-

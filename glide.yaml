@@ -19,7 +19,7 @@ import:
 - package: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 - package: github.com/getnelson/api
-  version: 5bdf591afeae6880f49b2026e1975af5a2050ecb
+  version: b34ae15e3411689955977de715a10d5bd2901de5
   subpackages:
   - protobuf
 - package: github.com/gogo/googleapis
