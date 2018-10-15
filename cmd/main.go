@@ -407,11 +407,13 @@ func main() {
 				task := "deploy"
 				// yes my pretty, a JSON string you will be
 				payload := string(encoded)
+				contexts := []string{}
 
 				r := github.DeploymentRequest{
 					Ref:     &userGithubTag,
 					Task:    &task,
 					Payload: &payload,
+					RequiredContexts: &contexts,
 				}
 
 				if isDryRun {
