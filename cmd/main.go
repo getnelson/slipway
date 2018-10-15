@@ -410,9 +410,9 @@ func main() {
 				contexts := []string{}
 
 				r := github.DeploymentRequest{
-					Ref:     &userGithubTag,
-					Task:    &task,
-					Payload: &payload,
+					Ref:              &userGithubTag,
+					Task:             &task,
+					Payload:          &payload,
 					RequiredContexts: &contexts,
 				}
 
