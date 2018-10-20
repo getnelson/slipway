@@ -336,6 +336,10 @@ func main() {
 					Usage:       "Is this a dry run or not",
 					Destination: &isDryRun,
 				},
+				cli.StringSliceFlag{
+					Name:  "required-context",
+					Usage: "Required Github contexts that should pass before this deployment can be accepted",
+				},
 			},
 			Action: func(c *cli.Context) error {
 				if len(userGithubTag) <= 0 {
@@ -407,7 +411,7 @@ func main() {
 				task := "deploy"
 				// yes my pretty, a JSON string you will be
 				payload := string(encoded)
-				contexts := []string{}
+				contexts := c.StringSlice("required-context")
 
 				r := github.DeploymentRequest{
 					Ref:              &userGithubTag,
