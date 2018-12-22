@@ -1,0 +1,116 @@
+version: 2.1
+
+description: |
+  Run Slipway commands from your workflows
+
+github_creds: &github_creds
+
+  endpoint:
+    description: |
+      domain of the github api endpoint
+    type: string
+    default: $GITHUB_ADDR
+
+  github-user:
+    description: |
+      the github user with which to perform the operation
+    type: string
+    default: $GITHUB_USER
+
+  github-token:
+    description: |
+      the github access token with which to perform the operation
+    type: string
+    default: $GITHUB_TOKEN
+
+executors:
+  default:
+    description: |
+      the base slipway container to use for running commands
+
+    parameters:
+      slipway-version:
+        type: string
+        default: "latest"
+
+    docker:
+      - image: getnelson/slipway:<<parameters.slipway-version>>
+
+commands:
+  gen:
+    description: |
+      Generate deployable metadata for units
+    
+    parameters:
+      container:
+        description: |
+          the container for which to produce a deployable
+        type: string
+
+      format:
+        description: |
+          encoding format to use; present options are 'yml' or 'nldp'
+        type: string
+        default: yml
+
+    steps:
+      - run:
+          name: generate deployable metadata
+          command: |
+            slipway gen <<parameters.container>> --dir .slipway -f <<parameters.format>>
+
+      - persist_workspace:
+          root: .
+          paths:
+            - .slipway
+
+  release:
+    description: |
+      create a Github release for the given repo + tag
+
+    parameters:
+      <<: *github_creds
+
+      repo:
+        description: the github repository; this must be a fully qualified name [org]/[repo]
+        type: string
+
+      tag:
+        description: the tag to release
+        type: string
+
+      branch:
+        description: branch to base release off from
+        type: string
+
+    steps:
+      - run:
+          name:
+          command: |
+            slipway release --dir .slipway -e <<parameters.endpoint>> -t <<parameters.tag>> -r <<parameters.repo>>
+
+  deploy:
+    description: |
+      create a Github deployment for a given repository
+
+    parameters:
+      <<: *github_creds
+
+      repo:
+        description: the github repository; this must be a fully qualified name [org]/[repo]
+        type: string
+
+      ref:
+        description: a github reference to deploy
+        type: string
+
+      context:
+        description: required Github contexts that should pass before this deployment can be accepted
+        type: string
+        default: default
+
+    steps:
+      - run:
+          name:
+          command: |
+            slipway release --dir .slipway -e <<parameters.endpoint>> -t <<parameters.tag>> -r <<parameters.repository>> --ref <<parameters.ref>>
