@@ -59,7 +59,7 @@ commands:
           command: |
             slipway gen <<parameters.container>> --dir .slipway -f <<parameters.format>>
 
-      - persist_workspace:
+      - persist_to_workspace:
           root: .
           paths:
             - .slipway
@@ -74,14 +74,17 @@ commands:
       repo:
         description: the github repository; this must be a fully qualified name [org]/[repo]
         type: string
+        default: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
       tag:
         description: the tag to release
         type: string
+        default: $CIRCLE_TAG
 
       branch:
         description: branch to base release off from
         type: string
+        default: $CIRCLE_BRANCH
 
     steps:
       - run:
@@ -99,6 +102,7 @@ commands:
       repo:
         description: the github repository; this must be a fully qualified name [org]/[repo]
         type: string
+        default: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
       ref:
         description: a github reference to deploy
@@ -113,4 +117,4 @@ commands:
       - run:
           name:
           command: |
-            slipway release --dir .slipway -e <<parameters.endpoint>> -t <<parameters.tag>> -r <<parameters.repository>> --ref <<parameters.ref>>
+            slipway release --dir .slipway -e <<parameters.endpoint>> -r <<parameters.repo>> --ref <<parameters.ref>>
