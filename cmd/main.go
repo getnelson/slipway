@@ -433,6 +433,7 @@ func main() {
 					Payload:          &payload,
 					RequiredContexts: &contexts,
 					Environment:      &userGithubEnv,
+					Description:      &userGithubDescription,
 				}
 
 				if isDryRun {
