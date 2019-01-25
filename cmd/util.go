@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/magiconair/properties.v1"
+	properties "gopkg.in/magiconair/properties.v1"
 
 	nelson "github.com/getnelson/slipway/nelson"
 )
@@ -64,7 +64,7 @@ func findDeployableFilesInDir(path string, extension string) ([]string, error) {
 
 		for _, file := range files {
 			filename := file.Name()
-			if (strings.HasSuffix(filename, ".deployable."+extension) || strings.HasSuffix(filename, ".deployable.yaml")) && file.IsDir() == false {
+			if (strings.HasSuffix(filename, ".deployable."+extension) || strings.HasSuffix(filename, ".deployable.yml")) && file.IsDir() == false {
 				desired = append(desired, path+"/"+filename)
 			}
 		}
