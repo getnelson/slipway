@@ -36,4 +36,5 @@ func checkUnitNameFromImage(image string, oImage string, oTag string, t *testing
 func TestUnitNameExtractor(t *testing.T) {
 	checkUnitNameFromImage("docker.yourcompany.com/units/aloha-1.0:1.0.9", "aloha", "1.0.9", t)
 	checkUnitNameFromImage("docker.yourcompany.com/units/aloha:1.0.9", "aloha", "1.0.9", t)
+	checkUnitNameFromImage("docker.yourcompany.com/units/aloha:d6cd1e2bd19e03a81132a23b2025920577f84e37", "aloha", "d6cd1e2bd19e03a81132a23b2025920577f84e37", t)
 }
