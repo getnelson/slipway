@@ -28,7 +28,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/google/go-github/github"
-	"gopkg.in/urfave/cli.v1"
+	cli "gopkg.in/urfave/cli.v1"
 
 	nelson "github.com/getnelson/slipway/nelson"
 )
@@ -57,21 +57,23 @@ func main() {
 
 	// switches for the cli
 	var (
-		userDirectory       string
-		userGithubHost      string
-		userGithubTag       string
-		userGithubRepoSlug  string
-		credentialsLocation string
-		targetBranch        string
-		genEncodingMode     string
-		isDryRun            bool
+		userDirectory         string
+		userGithubHost        string
+		userGithubTag         string
+		userGithubRepoSlug    string
+		userGithubDescription string
+		userGithubEnv         string
+		credentialsLocation   string
+		targetBranch          string
+		genEncodingMode       string
+		isDryRun              bool
 	)
 
 	app.Commands = []cli.Command{
 		////////////////////////////// DEPLOYABLE //////////////////////////////////
 		{
 			Name:  "gen",
-			Usage: "generate deployable metdata for units",
+			Usage: "generate deployable metadata for units",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:        "dir, d",
@@ -340,6 +342,18 @@ func main() {
 					Name:  "required-context",
 					Usage: "Required Github contexts that should pass before this deployment can be accepted",
 				},
+				cli.StringFlag{
+					Name:        "description, D",
+					Value:       "",
+					Usage:       "The description to apply to the deployment, for example the deployable's ingress endpoint",
+					Destination: &userGithubDescription,
+				},
+				cli.StringFlag{
+					Name:        "env, e",
+					Value:       "production",
+					Usage:       "GitHub deployment environment to target",
+					Destination: &userGithubEnv,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				if len(userGithubTag) <= 0 {
@@ -418,6 +432,8 @@ func main() {
 					Task:             &task,
 					Payload:          &payload,
 					RequiredContexts: &contexts,
+					Environment:      &userGithubEnv,
+					Description:      &userGithubDescription,
 				}
 
 				if isDryRun {
