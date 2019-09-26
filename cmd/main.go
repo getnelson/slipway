@@ -426,6 +426,7 @@ func main() {
 				// yes my pretty, a JSON string you will be
 				payload := string(encoded)
 				contexts := c.StringSlice("required-context")
+				boolpoint := false
 
 				r := github.DeploymentRequest{
 					Ref:              &userGithubTag,
@@ -434,6 +435,7 @@ func main() {
 					RequiredContexts: &contexts,
 					Environment:      &userGithubEnv,
 					Description:      &userGithubDescription,
+					AutoMerge: 			  &boolpoint,
 				}
 
 				if isDryRun {
